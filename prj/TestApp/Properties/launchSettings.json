@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "TestApp": {
+      "commandName": "Project"
+    },
+    "Test CodeCoverage": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Users\\alag\\.dotnet\\tools\\dotnet-coverage.exe",
+      "commandLineArgs": "collect TestApp.exe -f xml -o coverage.xml",
+      "workingDirectory": "W:\\TeckinSoft\\CodeCoverageViewer\\TestApp\\bin\\Debug\\net8.0"
+    }
+  }
+}

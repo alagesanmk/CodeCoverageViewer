@@ -1,0 +1,7 @@
+/prj/.vs
+/prj/TestApp/bin
+/prj/TestApp/obj
+/prj/CodeCoverageViewer/bin
+/prj/CodeCoverageViewer/obj
+*.csproj.user
+
