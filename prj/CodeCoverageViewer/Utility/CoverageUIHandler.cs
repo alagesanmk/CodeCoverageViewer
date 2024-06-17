@@ -34,7 +34,7 @@ class TreeViewHandler {
          item.ExpandSubtree ();
       }
 
-      // Connect Events for class, line, condition
+      // Connect Events for source_file
       foreach (Item.BaseItem item in rootItem.driveItems)
          this.connectSourceItemEvent (item);
    }
@@ -137,17 +137,27 @@ class SourceViewerHandler {
    /// </summary>
    /// <param name="rootItem">Coverage items to set Treeview</param>
    /// <param name="sourceViewer">Specifies FlowDocumentScrollViewer ui object to load Source Item file</param>
-   /// <param name="treeViewHandler">Specifies CoverageTreeViewHandler object</param>
+   /// <param name="sourceCoverage">Specifies Label ui object to show Source Coverage</param>
+   /// <param name="treeViewHandler">Specifies TreeViewHandler object</param>
+   /// <param name="mainWindow">Specifies Application MainWindow object</param>
    public void SetCoverage (Item.RootItem rootItem, 
                             FlowDocumentScrollViewer sourceViewer,
-                            TreeViewHandler treeViewHandler) {
+                            Label sourceCoverage,
+                            TreeViewHandler treeViewHandler,
+                            Window window) {
       this.treeViewHandler = treeViewHandler;
+      this.sourceCoverage = sourceCoverage;
       this.sourceViewer = sourceViewer;
 
+      this.window = window;
+
       // Set SourceViewer empty
-      sourceViewer.Document = null;
+      FlowDocument flowDocument = new FlowDocument ();
+      flowDocument.Background = Brushes.LightGray;
+      sourceViewer.Document = flowDocument;
       sourceViewer.Tag = null;
    }
+
    /// <summary>
    /// Loads a file (specified by filenName) into Source View and scroll to Line if lineNumber is given(not null)
    /// </summary>
@@ -161,15 +171,14 @@ class SourceViewerHandler {
 
          // Load source file
          try {
-            FlowDocument flowDocument = new FlowDocument ();
+            FlowDocument flowDocument = sourceViewer.Document;
             if (!this.readSourceFileLines (flowDocument, sourceItem))
                return;
 
-            sourceViewer.Document = flowDocument;
             sourceViewer.Tag = sourceItem.fileName;
          } catch (Exception ex) {
             MessageBox.Show ($"Loading source file failed: {ex.Message}", "Load Source Error",
-                              MessageBoxButton.OK, MessageBoxImage.Error);
+                             MessageBoxButton.OK, MessageBoxImage.Error);
          }
       }
 
@@ -179,7 +188,7 @@ class SourceViewerHandler {
          LineNo2RangesParaMap lineNo2RangesParaMap = 
                this.treeViewHandler.GetLineNo2RangesParaMap (sourceItem);
          RangesParagraph rangesPara =
-            this.treeViewHandler.GetRangesPara (lineNo2RangesParaMap, lineNo);
+               this.treeViewHandler.GetRangesPara (lineNo2RangesParaMap, lineNo);
          if (null != rangesPara.paragraph)
             rangesPara.paragraph.BringIntoView ();
 
@@ -281,9 +290,14 @@ class SourceViewerHandler {
    private bool readSourceFileLines (FlowDocument flowDocument, Item.SourceItem sourceItem) {
       flowDocument.FontFamily = new FontFamily ("Courier");
       flowDocument.LineHeight = double.NaN;
+      flowDocument.Background = Brushes.LightGray;
+
+      this.sourceCoverage.Content = sourceItem.blockCoverage;
+
+      Item.ModuleItem moduleItem = sourceItem.moduleItem;
+      this.window.Title = $"{sourceItem.nameSpace}: {moduleItem.blockCoverage}";
 
       bool success = true;
-      this.lineNoLength = 5; // Todo:Need to calc from file
       LineNo2RangesParaMap lineNo2RangesParaMap = null;
       try {
          using (StreamReader stream = File.OpenText (sourceItem.fileName)) {
@@ -323,7 +337,8 @@ class SourceViewerHandler {
    #region Private Data -------------------------------------------------------
    TreeViewHandler treeViewHandler = null;
    FlowDocumentScrollViewer sourceViewer = null;
-   int lineNoLength = 0;
+   Label sourceCoverage = null;
+   Window window = null;
    #endregion Private Data ----------------------------------------------------
 }
 #endregion SourceViewerHandler class -----------------------------------------------

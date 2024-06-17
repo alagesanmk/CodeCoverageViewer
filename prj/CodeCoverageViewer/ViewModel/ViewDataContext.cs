@@ -24,6 +24,12 @@ class ViewDataContext : ModelNotifyPropertyChanged {
          return mainWindow.CoverageItems;
       }
    }
+   private Label SourceCoverage {
+      get {
+         MainWindow mainWindow = this.ui as MainWindow;
+         return mainWindow.SourceCoverage;
+      }
+   }
    #endregion Properties -------------------------------------------------------
 
    #region "FileOpenCommand"
@@ -32,10 +38,10 @@ class ViewDataContext : ModelNotifyPropertyChanged {
    /// </summary>
    public ICommand FileOpenCommand {
       get {
-         if (fileOpenCommand == null)
-            fileOpenCommand = new Base.Command (param => this.FileOpen (), null);
+         if (this.fileOpenCommand == null)
+            this.fileOpenCommand = new Base.Command (param => this.FileOpen (), null);
 
-         return fileOpenCommand;
+         return this.fileOpenCommand;
       }
    }
    private ICommand fileOpenCommand;
@@ -51,9 +57,16 @@ class ViewDataContext : ModelNotifyPropertyChanged {
       if (false == dialog.ShowDialog ())
          return;
 
+      this.loadCoverageFile (dialog.FileName);
+   }
+
+   string coverageFilename = null;
+
+   void loadCoverageFile (string fileName) {
+      this.coverageFilename = fileName;
       // Loads Code Coveage informations
       Reader reader = new ();
-      Item.RootItem rootItem = reader.Read (dialog.FileName);
+      Item.RootItem rootItem = reader.Read (this.coverageFilename);
       if (null == rootItem) {
          MessageBox.Show (reader.Error, "Code Coverage Report File Read Error",
                           MessageBoxButton.OK, MessageBoxImage.Error);
@@ -64,9 +77,35 @@ class ViewDataContext : ModelNotifyPropertyChanged {
       this.treeViewHandler.SetCoverage (rootItem, this.CoverageTree, this.sourceViewerHandler);
 
       MainWindow mainWindow = this.ui as MainWindow;
-      this.sourceViewerHandler.SetCoverage (rootItem, mainWindow.SourceViewer, this.treeViewHandler);
+      this.sourceViewerHandler.SetCoverage (rootItem, 
+                                            mainWindow.SourceViewer, this.SourceCoverage, 
+                                            this.treeViewHandler, (Window)this.ui);
+
    }
+
    #endregion "FileOpenCommand"
+
+   #region "Recompute"
+   /// <summary>
+   /// File Open menu handler
+   /// </summary>
+   public ICommand RecomputeCommand {
+      get {
+         if (this.recomputeCommmand == null)
+            this.recomputeCommmand = new Base.Command (param => this.Recompute (), 
+                                                       canExcute => null != this.coverageFilename);
+
+         return this.recomputeCommmand;
+      }
+   }
+   private ICommand recomputeCommmand;
+   public void Recompute () {
+      if (null == this.coverageFilename)
+         return;
+
+      this.loadCoverageFile (this.coverageFilename);
+   }
+   #endregion 
 
    #region Methods -------------------------------------------------------------
    /// <summary>

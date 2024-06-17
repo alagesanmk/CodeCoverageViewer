@@ -15,14 +15,27 @@ internal class BaseItem : TreeViewItem {
 }
 #endregion class BaseItem -----------------------------------------------------------
 
-#region class SourceItem ------------------------------------------------------------
-class SourceItem : BaseItem {
+#region class ModuleItem -----------------------------------------------------------
+class ModuleItem  {
    #region Data ---------------------------------------------------------------
-   public string fileName;
-   public List<RangeItem> rangeItems = new ();
+   public string blockCoverage;
    #endregion Data ------------------------------------------------------------
 }
-#endregion class SourceItem ---------------------------------------------------------
+#endregion class ModuleItem --------------------------------------------------------
+
+#region class SourceItem -----------------------------------------------------------
+class SourceItem : BaseItem {
+   #region Data ---------------------------------------------------------------
+   public ModuleItem moduleItem = null;
+
+   public string fileName;
+   public string nameSpace;
+   public List<RangeItem> rangeItems = new ();
+
+   public string blockCoverage;
+   #endregion Data ------------------------------------------------------------
+}
+#endregion class SourceItem --------------------------------------------------------
 
 #region class RangeItem -------------------------------------------------------------
 class RangeItem {
