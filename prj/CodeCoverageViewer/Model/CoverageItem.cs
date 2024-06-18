@@ -2,20 +2,20 @@
 
 namespace CodeCoverageViewer.Item;
 
-// region RootItem class ----------------------------------------------------------------
+// RootItem class -----------------------------------------------------------------------
 internal class RootItem {
    public List<BaseItem> driveItems = new ();   
 }
 
-// region BaseItem class ----------------------------------------------------------------
+// BaseItem class -----------------------------------------------------------------------
 internal class BaseItem : TreeViewItem {}
 
-// region ModuleItem class --------------------------------------------------------------
+// ModuleItem class ---------------------------------------------------------------------
 class ModuleItem  {
    public string blockCoverage;   
 }
 
-// region SourceItem class --------------------------------------------------------------
+// SourceItem class ---------------------------------------------------------------------
 class SourceItem : BaseItem {
    public ModuleItem moduleItem = null;
 
@@ -26,7 +26,7 @@ class SourceItem : BaseItem {
    public string blockCoverage;
 }
 
-// region RangeItem class ---------------------------------------------------------------
+// RangeItem class ----------------------------------------------------------------------
 class RangeItem {
    public int startLine;
    public int startColumn;

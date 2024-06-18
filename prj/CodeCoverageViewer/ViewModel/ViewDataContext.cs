@@ -8,15 +8,13 @@ using CodeCoverageViewer.Utility;
 
 namespace CodeCoverageViewer;
 
-#region class ViewDataContext ------------------------------------------------------------
-/// <summary>
-/// ViewDataContext is data context class for MainWindow.xaml
-/// </summary>
+#region ViewDataContext class ----------------------------------------------------------
+/// <summary> ViewDataContext is data context class for MainWindow.xaml</summary>
 class ViewDataContext : ModelNotifyPropertyChanged {
-   // region Constructor -------------------------------------------------------
+   // Constructor -------------------------------------------------------------
    public ViewDataContext () { }
 
-   #region Properties ----------------------------------------------------------
+   #region Properties ---------------------------------------------------------
    private TreeView CoverageTree {
       get {
          MainWindow mainWindow = this.ui as MainWindow;
@@ -32,9 +30,7 @@ class ViewDataContext : ModelNotifyPropertyChanged {
    #endregion Properties 
 
    #region "FileOpenCommand"
-   /// <summary>
-   /// File Open menu handler
-   /// </summary>
+   /// <summary> File Open menu handler</summary>
    public ICommand FileOpenCommand {
       get {
          if (this.fileOpenCommand == null)
@@ -60,8 +56,7 @@ class ViewDataContext : ModelNotifyPropertyChanged {
    }
 
    string coverageFilename = null;
-   /// <summary> Loads a Coverage Xml file
-   /// </summary>
+   /// <summary> Loads a Coverage Xml file</summary>
    /// <param name="fileName"> Specifies the Xml coverage filename</param>
    void loadCoverageFile (string fileName) {
       this.coverageFilename = fileName;
@@ -75,19 +70,14 @@ class ViewDataContext : ModelNotifyPropertyChanged {
       }
 
       // Set coverage items to TreeView, SourceViewer
-      this.treeViewHandler.SetCoverage (rootItem, this.CoverageTree, this.sourceViewerHandler);
-
-      MainWindow mainWindow = this.ui as MainWindow;
-      this.sourceViewerHandler.SetCoverage (rootItem, mainWindow.SourceViewer, this.SourceCoverage, 
-                                            this.treeViewHandler, (Window)this.ui);
+      this.treeViewHandler.SetCoverage (rootItem);
+      this.sourceViewerHandler.SetCoverage (rootItem);
 
    }
    #endregion "FileOpenCommand"
 
    #region "Recompute"
-   /// <summary>
-   /// File Open menu handler
-   /// </summary>
+   /// <summary> File Open menu handler</summary>
    public ICommand RecomputeCommand {
       get {
          if (this.recomputeCommmand == null)
@@ -106,26 +96,26 @@ class ViewDataContext : ModelNotifyPropertyChanged {
    }
    #endregion 
 
-   // region Methods ----------------------------------------------------------
-   /// <summary>
-   /// Initializes Coverage Tree with shortcut item to load report file
-   /// </summary>
-   public void InitCoverageTree () {
-      TreeViewItem treeViewItem = this.treeViewHandler.InitCoverageTree (this.CoverageTree);
+   // Methods -----------------------------------------------------------------
+   /// <summary> Initializes UI object such as Tree, SourceView...</summary>
+   public void Init () {
+      TreeViewItem treeViewItem = this.treeViewHandler.InitCoverageTree (this.CoverageTree, this.sourceViewerHandler);
       treeViewItem.Selected += loadReport_Selected;
-   }   
 
-   // region Implementation ---------------------------------------------------
-   /// <summary>
-   /// Report file open shortcut Event handler 
-   /// </summary>
+      MainWindow mainWindow = this.ui as MainWindow;
+      this.sourceViewerHandler.Init (mainWindow.SourceViewer, this.SourceCoverage,
+                                     this.treeViewHandler, mainWindow);
+   }
+
+   // Implementation ----------------------------------------------------------
+   /// <summary> Report file open shortcut Event handler </summary>
    private void loadReport_Selected (object sender, RoutedEventArgs e) {
       this.FileOpen ();
-   }      
+   }
 
-   // region Private Data -----------------------------------------------------
+   // Private Data ------------------------------------------------------------
    public Window ui = null;
    public Utility.TreeViewHandler treeViewHandler { get; } = new ();
    private Utility.SourceViewerHandler sourceViewerHandler { get; } = new ();   
 }
-#endregion class ViewDataContext -------------------------------------------------------
+#endregion ViewDataContext class --------------------------------------------------------

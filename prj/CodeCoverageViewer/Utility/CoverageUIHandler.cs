@@ -10,26 +10,27 @@ namespace CodeCoverageViewer.Utility;
 /// <summary> An UI handler class for TreeView</summary>
 class TreeViewHandler {
    #region Methods ------------------------------------------------------------
-   public TreeViewItem InitCoverageTree (TreeView coverageTree) {
+   /// <summary> Initialize Tree Item to handle Selected event and call Coverage file open method</summary>
+   /// <param name="coverageTree"> Specifies TreeVuew ui object to load Source Item</param>
+   /// <param name="sourceViewerHandler"> Specifies depended SourceViewerHandler</param>
+   /// <returns>Returns create Tree Item</returns>
+   public TreeViewItem InitCoverageTree (TreeView coverageTree, SourceViewerHandler sourceViewerHandler) {
+      this.coverageTree = coverageTree;
+      this.sourceViewerHandler = sourceViewerHandler;
+
       TreeViewItem treeViewItem = new TreeViewItem ();
       treeViewItem.Header = "[Click to load Report ...]";  // Short cut to open report file 
-      coverageTree.Items.Add (treeViewItem);
+      this.coverageTree.Items.Add (treeViewItem);
       return treeViewItem;      
    }
 
    /// <summary Set Coverage Items to Tree View and initialzes the Source viewer</summary>
    /// <param name="rootItem"> Coverage items to set Treeview</param>
-   /// <param name="coverageTree"> Specifies TreeVuew ui object to load Source Item</param>
-   /// <param name="sourceViewer"> Specifies FlowDocumentScrollViewer ui object to load Source Item file</param>
-   public void SetCoverage (Item.RootItem rootItem,
-                            TreeView coverageTree,
-                            SourceViewerHandler sourceViewerHandler) {
-      this.sourceViewerHandler = sourceViewerHandler;
-
+   public void SetCoverage (Item.RootItem rootItem) {
       // Set to TreeView
-      coverageTree.Items.Clear ();
+      this.coverageTree.Items.Clear ();
       foreach (var item in rootItem.driveItems) {
-         coverageTree.Items.Add (item);
+         this.coverageTree.Items.Add (item);
          item.ExpandSubtree ();
       }
 
@@ -117,9 +118,10 @@ class TreeViewHandler {
    }
    #endregion Implementation 
 
-   // region Private Data ----------------------------------------------------
+   // Private Data ------------------------------------------------------------
+   TreeView coverageTree = null;
    SourceViewerHandler sourceViewerHandler = null;
-   Dictionary<Item.SourceItem, LineNo2RangesParaMap> source2RangesParaMap = new ();   
+   Dictionary<Item.SourceItem, LineNo2RangesParaMap> source2RangesParaMap = new ();
 }
 #endregion TreeViewHandler class --------------------------------------------------------
 
@@ -127,23 +129,24 @@ class TreeViewHandler {
 /// <summary> An UI handler class for SourceViewer</summary>
 class SourceViewerHandler {
    #region Methods ------------------------------------------------------------
-   /// <summary>Set Coverage Items to Tree View and initialzes the Source viewer</summary>
-   /// <param name="rootItem"> Coverage items to set Treeview</param>
+   /// <summary> Initializes SourceViewerHandler</summary>
    /// <param name="sourceViewer"> Specifies FlowDocumentScrollViewer ui object to load Source Item file</param>
    /// <param name="sourceCoverage"> Specifies Label ui object to show Source Coverage</param>
    /// <param name="treeViewHandler"> Specifies TreeViewHandler object</param>
    /// <param name="mainWindow"> Specifies Application MainWindow object</param>
-   public void SetCoverage (Item.RootItem rootItem, 
-                            FlowDocumentScrollViewer sourceViewer,
-                            Label sourceCoverage,
-                            TreeViewHandler treeViewHandler,
-                            Window window) {
-      this.treeViewHandler = treeViewHandler;
-      this.sourceCoverage = sourceCoverage;
+   public void Init (FlowDocumentScrollViewer sourceViewer,
+                     Label sourceCoverageLb,
+                     TreeViewHandler treeViewHandler,
+                     Window window) {
       this.sourceViewer = sourceViewer;
-
+      this.treeViewHandler = treeViewHandler;
+      this.sourceCoverageLb = sourceCoverageLb;
       this.window = window;
+   }
 
+   /// <summary>Set Coverage Items to Tree View and initialzes the Source viewer</summary>
+   /// <param name="rootItem"> Coverage items to set Treeview. Note:Not used now, will be used if required</param>
+   public void SetCoverage (Item.RootItem rootItem) {
       // Set SourceViewer empty
       FlowDocument flowDocument = new FlowDocument ();
       flowDocument.Background = this.srcBackgroundColor;
@@ -275,7 +278,7 @@ class SourceViewerHandler {
       flowDocument.LineHeight = double.NaN;
       flowDocument.Blocks.Clear ();
 
-      this.sourceCoverage.Content = sourceItem.blockCoverage;
+      this.sourceCoverageLb.Content = sourceItem.blockCoverage;
 
       Item.ModuleItem moduleItem = sourceItem.moduleItem;
       this.window.Title = $"{sourceItem.nameSpace}: {moduleItem.blockCoverage}";
@@ -317,13 +320,13 @@ class SourceViewerHandler {
    }
    #endregion Implementation
 
-   // region Private Data ----------------------------------------------------
+   // Private Data -------------------------------------------------------------
    readonly SolidColorBrush srcBackgroundColor = Brushes.Gainsboro;
    readonly string srcFontFamily = "Courier";
    readonly double srcFontSize = 12;
    TreeViewHandler treeViewHandler = null;
    FlowDocumentScrollViewer sourceViewer = null;
-   Label sourceCoverage = null;
+   Label sourceCoverageLb = null;
    Window window = null;   
 }
 #endregion SourceViewerHandler class ----------------------------------------------------

@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace CodeCoverageViewer.Base;
 
-#region class ViewModel ----------------------------------------------------------
+#region ModelNotifyPropertyChanged class ----------------------------------------------------------
 /// <summary>
 /// Base class to use in Xaml Binding Notify Property change in Datacontext
 /// </summary>
@@ -19,4 +19,4 @@ public class ModelNotifyPropertyChanged : INotifyPropertyChanged
    #endregion INotifyPropertyChanged -----------------------------------------------------
 }
 
-#endregion class ViewModel -------------------------------------------------------
+#endregion ModelNotifyPropertyChanged class -------------------------------------------------------

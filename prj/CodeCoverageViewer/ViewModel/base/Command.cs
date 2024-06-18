@@ -2,7 +2,7 @@
 
 namespace CodeCoverageViewer.Base;
 
-#region class Command ----------------------------------------------------------
+#region Command class -------------------------------------------------------------------
 /// <summary>
 /// Base class to use in Xaml Binding Command
 /// </summary>
@@ -37,4 +37,4 @@ public class Command : ICommand {
    private readonly Action<object> _execute;
    #endregion
 }
-#endregion class Command ----------------------------------------------------------
+#endregion Command class ----------------------------------------------------------------

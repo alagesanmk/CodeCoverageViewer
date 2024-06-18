@@ -3,10 +3,10 @@ using System.Xml;
 
 namespace CodeCoverageViewer.Utility;
 
-#region class Reader --------------------------------------------------------------------
+#region Reader class --------------------------------------------------------------------
 /// <summary> Utility class to read Code Covarge Report file in Xml format</summary>
 internal class Reader {
-   // region Properties -------------------------------------------------------
+   // Properties --------------------------------------------------------------
    public string Error { get; set; } = "";
    
    #region Methods ------------------------------------------------------------
@@ -251,9 +251,9 @@ internal class Reader {
    }
    #endregion Implementation
 
-   // region Nested class ----------------------------------------------------
+   // Nested class ------------------------------------------------------------
    class KeyItemMap : Dictionary<string, BaseItem> { }
    class ModuleMap : Dictionary<string, ModuleItem> { }
    
 }
-#endregion class Reader ----------------------------------------------------------------
+#endregion Reader class -----------------------------------------------------------------

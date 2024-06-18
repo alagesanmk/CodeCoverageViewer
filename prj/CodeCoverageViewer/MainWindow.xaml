@@ -23,22 +23,21 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="100*"></RowDefinition>
-                <RowDefinition Height="100*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
                 <RowDefinition Height="24"></RowDefinition>
             </Grid.RowDefinitions>
             <TreeView x:Name="CoverageItems" 
-                        Grid.Row="0" Grid.Column="0" Grid.RowSpan="3"
+                        Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
                         ItemsSource="{Binding Coverages}" Margin="4,4,0,4" 
                         BorderBrush="{x:Null}" BorderThickness="0"
                         Background="Gainsboro">
             </TreeView>
             <GridSplitter Width="4" 
-                        Grid.Row="0" Grid.Column="1" Grid.RowSpan="3"
+                        Grid.Row="0" Grid.Column="1" Grid.RowSpan="2"
                         Background="Gray"                        
                         ResizeBehavior="PreviousAndNext"/>
             <FlowDocumentScrollViewer x:Name="SourceViewer" 
-                        Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" Grid.ColumnSpan="2"
+                        Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2"
                         Margin="0,4,4,4">
                 <FlowDocument Background="Gainsboro">
                     <Paragraph TextAlignment="Center">

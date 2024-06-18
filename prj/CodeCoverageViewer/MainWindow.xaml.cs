@@ -12,6 +12,6 @@ public partial class MainWindow : Window {
       InitializeComponent ();
       this.DataContext = this.viewModelContext;
       this.viewModelContext.ui = this;
-      this.viewModelContext.InitCoverageTree ();
+      this.viewModelContext.Init ();
    }
 }
