@@ -8,7 +8,7 @@ namespace CodeCoverageViewer.Utility;
 
 #region TreeViewHandler class ------------------------------------------------------------
 /// <summary> An UI handler class for TreeView</summary>
-class TreeViewUIHandler {
+class TreeViewHandler {
    #region Methods ------------------------------------------------------------
    public TreeViewItem InitCoverageTree (TreeView coverageTree) {
       TreeViewItem treeViewItem = new TreeViewItem ();
@@ -136,7 +136,7 @@ class SourceViewerHandler {
    public void SetCoverage (Item.RootItem rootItem, 
                             FlowDocumentScrollViewer sourceViewer,
                             Label sourceCoverage,
-                            TreeViewUIHandler treeViewHandler,
+                            TreeViewHandler treeViewHandler,
                             Window window) {
       this.treeViewHandler = treeViewHandler;
       this.sourceCoverage = sourceCoverage;
@@ -146,7 +146,7 @@ class SourceViewerHandler {
 
       // Set SourceViewer empty
       FlowDocument flowDocument = new FlowDocument ();
-      flowDocument.Background = Brushes.LightGray;
+      flowDocument.Background = this.srcBackgroundColor;
       sourceViewer.Document = flowDocument;
       sourceViewer.Tag = null;
    }
@@ -205,7 +205,7 @@ class SourceViewerHandler {
                         LineNo2RangesParaMap lineNo2RangesParaMap) {
       RangesParagraph rangesPara = this.treeViewHandler.GetRangesPara (lineNo2RangesParaMap, lineNo);
       // No range item for this line
-      if (null == rangesPara || 0 == rangesPara.rangeItems.Count) {      
+      if (null == rangesPara || 0 == rangesPara.rangeItems.Count) {
          inLines.Add ($"{lineNo}: {line}");
          return;
       }
@@ -249,11 +249,7 @@ class SourceViewerHandler {
 
          // Range part
          length = endColumn - startColumn + 1;
-         try {
-            rangeText = line.Substring (startColumn, length);
-         } catch (Exception ex) {
-            string msg = ex.Message;
-         }
+         rangeText = line.Substring (startColumn, length);
 
          Run run = new Run (rangeText);
          run.Background = rangeItem.covered ? Brushes.DeepSkyBlue : Brushes.DarkOrange;
@@ -275,9 +271,8 @@ class SourceViewerHandler {
    /// <param name="sourceItem"> Specifies the sourceItem whose file name to load</param>
    /// <returns> Returns true if successfully read source file otherwise false</returns>
    private bool readSourceFileLines (FlowDocument flowDocument, Item.SourceItem sourceItem) {
-      flowDocument.FontFamily = new FontFamily ("Courier");
+      flowDocument.FontFamily = new FontFamily (this.srcFontFamily);
       flowDocument.LineHeight = double.NaN;
-      flowDocument.Background = Brushes.LightGray;
       flowDocument.Blocks.Clear ();
 
       this.sourceCoverage.Content = sourceItem.blockCoverage;
@@ -294,8 +289,8 @@ class SourceViewerHandler {
             while ((line = stream.ReadLine ()) != null) {
                Paragraph paragraph = new Paragraph ();
                paragraph.Margin = new Thickness (0, 0, 0, 0);
-               paragraph.FontSize = 12;
-               paragraph.FontFamily = new FontFamily ("Courier");
+               paragraph.FontSize = this.srcFontSize;
+               paragraph.FontFamily = new FontFamily (this.srcFontFamily);
                paragraph.Tag = lineNo;
 
                if(null == lineNo2RangesParaMap)
@@ -323,7 +318,10 @@ class SourceViewerHandler {
    #endregion Implementation
 
    // region Private Data ----------------------------------------------------
-   TreeViewUIHandler treeViewHandler = null;
+   readonly SolidColorBrush srcBackgroundColor = Brushes.Gainsboro;
+   readonly string srcFontFamily = "Courier";
+   readonly double srcFontSize = 12;
+   TreeViewHandler treeViewHandler = null;
    FlowDocumentScrollViewer sourceViewer = null;
    Label sourceCoverage = null;
    Window window = null;   

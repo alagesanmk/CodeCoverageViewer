@@ -125,7 +125,7 @@ class ViewDataContext : ModelNotifyPropertyChanged {
 
    // region Private Data -----------------------------------------------------
    public Window ui = null;
-   public Utility.TreeViewUIHandler treeViewHandler { get; } = new ();
+   public Utility.TreeViewHandler treeViewHandler { get; } = new ();
    private Utility.SourceViewerHandler sourceViewerHandler { get; } = new ();   
 }
 #endregion class ViewDataContext -------------------------------------------------------
