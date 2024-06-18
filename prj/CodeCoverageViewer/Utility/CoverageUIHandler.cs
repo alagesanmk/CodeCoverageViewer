@@ -11,7 +11,7 @@ class TreeViewHandler {
   #region Methods ------------------------------------------------------------
    public TreeViewItem InitCoverageTree (TreeView coverageTree) {
       TreeViewItem treeViewItem = new TreeViewItem ();
-      treeViewItem.Header = "Click to load Report ...";  // Short cut to open report file 
+      treeViewItem.Header = "[Click to load Report ...]";  // Short cut to open report file 
       coverageTree.Items.Add (treeViewItem);
       return treeViewItem;      
    }
@@ -291,6 +291,7 @@ class SourceViewerHandler {
       flowDocument.FontFamily = new FontFamily ("Courier");
       flowDocument.LineHeight = double.NaN;
       flowDocument.Background = Brushes.LightGray;
+      flowDocument.Blocks.Clear ();
 
       this.sourceCoverage.Content = sourceItem.blockCoverage;
 

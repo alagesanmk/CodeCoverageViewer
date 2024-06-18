@@ -17,19 +17,19 @@
         </Menu>
         <Grid x:Name="Grid" Margin="0,20,0,0" Background="Gray">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250"></ColumnDefinition>
-                <ColumnDefinition Width="2"></ColumnDefinition>
-                <ColumnDefinition Width="200"></ColumnDefinition>
+                <ColumnDefinition Width="310"></ColumnDefinition>
+                <ColumnDefinition Width="3"></ColumnDefinition>
+                <ColumnDefinition Width="75"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="100*"></RowDefinition>
                 <RowDefinition Height="100*"></RowDefinition>
-                <RowDefinition Height="30"></RowDefinition>
+                <RowDefinition Height="24"></RowDefinition>
             </Grid.RowDefinitions>
             <TreeView x:Name="CoverageItems" 
                         Grid.Row="0" Grid.Column="0" Grid.RowSpan="3"
-                        ItemsSource="{Binding Coverages}" Margin="2,2,0,2" 
+                        ItemsSource="{Binding Coverages}" Margin="4,4,0,4" 
                         BorderBrush="{x:Null}" BorderThickness="0"
                         Background="LightGray">
             </TreeView>
@@ -39,10 +39,10 @@
                         HorizontalAlignment="Center"/>
             <FlowDocumentScrollViewer x:Name="SourceViewer" 
                         Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" Grid.ColumnSpan="2"
-                        Margin="0,2,2,2">
+                        Margin="0,4,4,4">
                 <FlowDocument Background="LightGray">
-                    <Paragraph>
-                        Source View
+                    <Paragraph TextAlignment="Center">
+                        [Source View]
                     </Paragraph>
                 </FlowDocument>
             </FlowDocumentScrollViewer>
@@ -50,13 +50,13 @@
                     Background="LightBlue" 
                     Grid.Row="2" Grid.Column="2"
                     BorderThickness="0"
-                    Margin="0,0,2,2" 
+                    Margin="0,0,4,4" 
                     Command="{Binding RecomputeCommand}"
                     IsEnabled="{Binding RecomputeCommand}"/>
             <Label x:Name="SourceCoverage" Content="" Background="LightGray"
                    Grid.Row="2" Grid.Column="3" 
                    Grid.ColumnSpan="2"
-                   Margin="0,0,2,2" />
+                   Margin="0,0,4,4" />
         </Grid>
     </Grid>
 </Window>
