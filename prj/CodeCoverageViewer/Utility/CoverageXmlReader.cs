@@ -1,26 +1,18 @@
 ﻿using CodeCoverageViewer.Item;
-using System;
-using System.Windows.Controls;
 using System.Xml;
-using System.Xml.XPath;
 
 namespace CodeCoverageViewer.Utility;
 
-#region class Reader --------------------------------------------------------------
-/// <summary>
-/// Utility class to read Code Covarge Report file in Xml format
-/// </summary>
+#region class Reader --------------------------------------------------------------------
+/// <summary> Utility class to read Code Covarge Report file in Xml format</summary>
 internal class Reader {
-   #region Properties ---------------------------------------------------------
+   // region Properties -------------------------------------------------------
    public string Error { get; set; } = "";
-   #endregion Properties ------------------------------------------------------
-
+   
    #region Methods ------------------------------------------------------------
-   /// <summary>
-   /// Reads Code coverate xml file and adds Coverage Drive Item and descendants Folder, Source
-   /// </summary>
-   /// <param name="fileName">Specifies the filename of Code Coverage xml file</param>
-   /// <returns>Returns new Coverage root item which has descendants Drive, Folder and Source,  
+   /// <summary> Reads Code coverate xml file and adds Coverage Drive Item and descendants Folder, Source</summary>
+   /// <param name="fileName"> Specifies the filename of Code Coverage xml file</param>
+   /// <returns> Returns new Coverage root item which has descendants Drive, Folder and Source,  
    ///          Otherwise null if read file fails
    /// </returns>
    public RootItem Read (string fileName) {
@@ -73,17 +65,15 @@ internal class Reader {
 
       return rootItem;
    }
-   #endregion Methods --------------------------------------------------------
+   #endregion Methods 
 
    #region Implementation ----------------------------------------------------
-   /// <summary>
-   /// Reads ModuleNode node attributes and descendants source_file/range nodes
-   /// </summary>
-   /// <param name="rootItem">Root item to add Drive and descendants</param>
-   /// <param name="driveMap">Drive Letter to Drive Item map</param>
-   /// <param name="folderMap">Folder Item map</param>
-   /// <param name="moduleNode">Module xml node to read sourc_file and range xml node</param>
-   /// <param name="moduleItem">Module Item to update block Coverage and 
+   /// <summary> Reads ModuleNode node attributes and descendants source_file/range nodes</summary>
+   /// <param name="rootItem"> Root item to add Drive and descendants</param>
+   /// <param name="driveMap"> Drive Letter to Drive Item map</param>
+   /// <param name="folderMap"> Folder Item map</param>
+   /// <param name="moduleNode"> Module xml node to read sourc_file and range xml node</param>
+   /// <param name="moduleItem"> Module Item to update block Coverage and 
    /// refereence to SourceItem
    /// </param>
    void parseModuleNode (RootItem rootItem,
@@ -116,14 +106,12 @@ internal class Reader {
       }
    }
 
-   /// <summary>
-   /// Reads SourceFileNode node attributes and split path to drive, folder and source file
-   /// </summary>
-   /// <param name="rootItem">Root item to add Drive and descendants</param>
-   /// <param name="driveMap">Drive Letter to Drive Item map</param>
-   /// <param name="folderMap">Folder Item map</param>
-   /// <param name="sourceIdMap">Source id to Source Item map</param>
-   /// <param name="moduleNode">Module xml node to read sourc_file and range xml node</param>
+   /// <summary> Reads SourceFileNode node attributes and split path to drive, folder and source file</summary>
+   /// <param name="rootItem"> Root item to add Drive and descendants</param>
+   /// <param name="driveMap"> Drive Letter to Drive Item map</param>
+   /// <param name="folderMap"> Folder Item map</param>
+   /// <param name="sourceIdMap"> Source id to Source Item map</param>
+   /// <param name="moduleNode"> Module xml node to read sourc_file and range xml node</param>
    void parseSourceFilesNode (RootItem rootItem,
                               KeyItemMap driveMap, KeyItemMap folderMap,
                               KeyItemMap sourceIdMap, 
@@ -142,16 +130,13 @@ internal class Reader {
       }
    }
 
-   /// <summary>
-   /// Update Source item block coverage values and percentage
-   /// </summary>
-   /// <param name="sourceItem"></param>
-   /// <param name="moduleNode"></param>
-   /// <param name="sourceId"></param>
-   /// <param name="moduleNode">Module xml node to read range xml node</param>
-   /// <param name="moduleItem">Module Item to update block Coverage and 
+   /// <summary> Update Source item block coverage values and percentage</summary>
+   /// <param name="sourceItem"> SourceItem whose block coverage to be need updated</param>
+   /// <param name="sourceId"> The value to identifiy the range xml nodes' with source_id  /param>
+   /// <param name="moduleNode"> Module xml node to read range xml node</param>
+   /// <param name="moduleItem"> Module Item to update block Coverage and 
    void updateSourceItemCoverge (SourceItem sourceItem, string sourceId, 
-                                XmlNode moduleNode, ModuleItem moduleItem) {
+                                 XmlNode moduleNode, ModuleItem moduleItem) {
       string cb, ncb, bc;
       int coveredBlock, notCoveredBlock;
       int blocks = 0, coveredBlocks = 0;
@@ -173,16 +158,14 @@ internal class Reader {
       sourceItem.blockCoverage = $"{coveredBlocks} / {blocks} : {coveredBlockPercent}%";
    }
 
-   /// <summary>
-   /// Splits path name to Drive, Folder and Source and adds to rootItem
-   /// </summary>
-   /// <param name="rootItem">Root item to add Drive, Folder and Source</param>
-   /// <param name="driveMap">Drive Letter to Drive Item map</param>
-   /// <param name="folderMap">Folder Item map</param>
-   /// <param name="sourceIdMap">Source id to Source Item map</param>
-   /// <param name="sourceFileId">Specifies the Source Item id</param>
-   /// <param name="sourceFilePath">Specifies the Source Item path</param>
-   /// <returns>Returns new SourceItem with data from sourceFilePath</returns>
+   /// <summary> Splits path name to Drive, Folder and Source and adds to rootItem</summary>
+   /// <param name="rootItem"> Root item to add Drive, Folder and Source</param>
+   /// <param name="driveMap"> Drive Letter to Drive Item map</param>
+   /// <param name="folderMap"> Folder Item map</param>
+   /// <param name="sourceIdMap"> Source id to Source Item map</param>
+   /// <param name="sourceFileId"> Specifies the Source Item id</param>
+   /// <param name="sourceFilePath"> Specifies the Source Item path</param>
+   /// <returns> Returns new SourceItem with data from sourceFilePath</returns>
    SourceItem splitSourceFileNode (RootItem rootItem, KeyItemMap driveMap, KeyItemMap folderMap,
                                    KeyItemMap sourceIdMap, string sourceFileId, string sourceFilePath,
                                    ModuleItem moduleItem) {
@@ -220,14 +203,12 @@ internal class Reader {
       return sourceItem;
    }
 
-   /// <summary>
-   /// Return a BaseItem if available in itemMap identified by key or creates new BaseItem
-   /// </summary>
-   /// <param name="items">New BaseItem is added to items</param>
-   /// <param name="itemMap">The item map from which to get exist or add new BaseItem</param>
-   /// <param name="name">Name for the new BaseItem</param>
-   /// <param name="key">Key value to identify the exiting Base item</param>
-   /// <returns>Created and existing Base item</returns>
+   /// <summary> Return a BaseItem if available in itemMap identified by key or creates new BaseItem</summary>
+   /// <param name="items"> New BaseItem is added to items</param>
+   /// <param name="itemMap"> The item map from which to get exist or add new BaseItem</param>
+   /// <param name="name"> Name for the new BaseItem</param>
+   /// <param name="key"> Key value to identify the exiting Base item</param>
+   /// <returns> Created and existing Base item</returns>
    BaseItem createOrGetItem (dynamic items, KeyItemMap itemMap,
                              string name, string key) {
 
@@ -250,11 +231,11 @@ internal class Reader {
    /// Return a ModuleITem if available in moduleMap identified by id 
    /// or creates new ModuleItem
    /// </summary>
-   /// <param name="items">New BaseItem is added to items</param>
-   /// <param name="moduleMap">The Module map from which to get exist 
+   /// <param name="items"> New BaseItem is added to items</param>
+   /// <param name="moduleMap"> The Module map from which to get exist 
    /// or add new ModuleItem</param>
-   /// <param name="id">Key value to identify the exiting ModuleItem</param>
-   /// <returns>Created and existing ModuleItem</returns>
+   /// <param name="id"> Key value to identify the exiting ModuleItem</param>
+   /// <returns> Created and existing ModuleItem</returns>
    ModuleItem createOrGetModuleItem (ModuleMap moduleMap, string id) {
 
       ModuleItem moduleItem = null;
@@ -268,11 +249,11 @@ internal class Reader {
 
       return moduleItem;
    }
-   #endregion Implementation --------------------------------------------------
+   #endregion Implementation
 
-   #region Nested class -------------------------------------------------------
+   // region Nested class ----------------------------------------------------
    class KeyItemMap : Dictionary<string, BaseItem> { }
    class ModuleMap : Dictionary<string, ModuleItem> { }
-   #endregion Nested class ----------------------------------------------------
+   
 }
-#endregion class Reader -------------------------------------------------------------
+#endregion class Reader ----------------------------------------------------------------

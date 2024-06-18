@@ -4,11 +4,12 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows;
 
-
 namespace CodeCoverageViewer.Utility;
-#region TreeViewHandler class ------------------------------------------------------
-class TreeViewHandler {
-  #region Methods ------------------------------------------------------------
+
+#region TreeViewHandler class ------------------------------------------------------------
+/// <summary> An UI handler class for TreeView</summary>
+class TreeViewUIHandler {
+   #region Methods ------------------------------------------------------------
    public TreeViewItem InitCoverageTree (TreeView coverageTree) {
       TreeViewItem treeViewItem = new TreeViewItem ();
       treeViewItem.Header = "[Click to load Report ...]";  // Short cut to open report file 
@@ -16,12 +17,10 @@ class TreeViewHandler {
       return treeViewItem;      
    }
 
-   /// <summary>
-   /// Set Coverage Items to Tree View and initialzes the Source viewer
-   /// </summary>
-   /// <param name="rootItem">Coverage items to set Treeview</param>
-   /// <param name="coverageTree">Specifies TreeVuew ui object to load Source Item</param>
-   /// <param name="sourceViewer">Specifies FlowDocumentScrollViewer ui object to load Source Item file</param>
+   /// <summary Set Coverage Items to Tree View and initialzes the Source viewer</summary>
+   /// <param name="rootItem"> Coverage items to set Treeview</param>
+   /// <param name="coverageTree"> Specifies TreeVuew ui object to load Source Item</param>
+   /// <param name="sourceViewer"> Specifies FlowDocumentScrollViewer ui object to load Source Item file</param>
    public void SetCoverage (Item.RootItem rootItem,
                             TreeView coverageTree,
                             SourceViewerHandler sourceViewerHandler) {
@@ -43,9 +42,9 @@ class TreeViewHandler {
    /// Returns LineNo2RangesParaMap identified by sourceItem.
    /// If create is true, LineNo2RangesParaMap will be created if not found
    /// </summary>
-   /// <param name="sourceItem">Identifier for LineNo2RangesParaMap</param>
-   /// <param name="create">If create is true, LineNo2RangesParaMap will be created if not found</param>
-   /// <returns>Returns existing LineNo2RangesParaMap identified by sourceItem.
+   /// <param name="sourceItem"> Identifier for LineNo2RangesParaMap</param>
+   /// <param name="create"> If create is true, LineNo2RangesParaMap will be created if not found</param>
+   /// <returns> Returns existing LineNo2RangesParaMap identified by sourceItem.
    /// New LineNo2RangesParaMap will be created, if not found and create is true.
    /// Otherwise null returned, if LineNo2RangesParaMap is not found and create is false
    /// </returns>
@@ -65,10 +64,10 @@ class TreeViewHandler {
    /// Returns RangesParagraph from lineNo2RangesParaMap identified by lineNo.
    /// If create is true, RangesParagraph will be created if not in lineNo2RangesParaMap
    /// </summary>
-   /// <param name="lineNo2RangesParaMap">Map lineNo2RangesParaMap from RangesParagraph is retrived or added</param>
-   /// <param name="lineNo">Identifier for RangesParagraph in Map lineNo2RangesParaMap</param>
-   /// <param name="create">If create is true, RangesParagraph will be created if not in lineNo2RangesParaMap</param>
-   /// <returns>Returns existing RangesParagraph identified by lineNo from lineNo2RangesParaMap.
+   /// <param name="lineNo2RangesParaMap"> Map lineNo2RangesParaMap from RangesParagraph is retrived or added</param>
+   /// <param name="lineNo"> Identifier for RangesParagraph in Map lineNo2RangesParaMap</param>
+   /// <param name="create"> If create is true, RangesParagraph will be created if not in lineNo2RangesParaMap</param>
+   /// <returns> Returns existing RangesParagraph identified by lineNo from lineNo2RangesParaMap.
    /// New RangesParagraph will be created, if not founded in lineNo2RangesParaMap and create is true.
    /// Otherwise null returned, if RangesParagraph is not found and create is false
    /// </returns>
@@ -84,13 +83,11 @@ class TreeViewHandler {
 
       return rangesPara;
    }
-   #endregion Methods ---------------------------------------------------------
+   #endregion Methods
 
    #region Implementation -----------------------------------------------------
-   /// <summary>
-   /// Connects Source Item Selected Event and add RangeItems to Source Item map
-   /// </summary>
-   /// <param name="parentItem"></param>
+   /// <summary> Connects Source Item Selected Event and add RangeItems to Source Item map</summary>
+   /// <param name="parentItem">The parent BaseItem from SourceItem is accessed </param>
    void connectSourceItemEvent (Item.BaseItem parentItem) {
       LineNo2RangesParaMap lineNo2RangesParaMap = null;
       foreach (Item.BaseItem item in parentItem.Items) {
@@ -113,37 +110,33 @@ class TreeViewHandler {
       }
    }
 
-   /// <summary>
-   /// Hanlder for Source Item Selected Event
-   /// </summary>
+   /// <summary> Handler for Source Item Selected Event</summary>
    void sourceItem_Selected (object sender, RoutedEventArgs e) {
       Item.SourceItem sourceItem = sender as Item.SourceItem;
       this.sourceViewerHandler.LoadSourceFile (sourceItem);
    }
-   #endregion Implementation --------------------------------------------------
+   #endregion Implementation 
 
-   #region Private Data -------------------------------------------------------
+   // region Private Data ----------------------------------------------------
    SourceViewerHandler sourceViewerHandler = null;
-   Dictionary<Item.SourceItem, LineNo2RangesParaMap> source2RangesParaMap = new ();
-   #endregion
+   Dictionary<Item.SourceItem, LineNo2RangesParaMap> source2RangesParaMap = new ();   
 }
-#endregion TreeViewHandler class ---------------------------------------------------
+#endregion TreeViewHandler class --------------------------------------------------------
 
-#region SourceViewerHandler class --------------------------------------------------
+#region SourceViewerHandler class -------------------------------------------------------
+/// <summary> An UI handler class for SourceViewer</summary>
 class SourceViewerHandler {
    #region Methods ------------------------------------------------------------
-   /// <summary>
-   /// Set Coverage Items to Tree View and initialzes the Source viewer
-   /// </summary>
-   /// <param name="rootItem">Coverage items to set Treeview</param>
-   /// <param name="sourceViewer">Specifies FlowDocumentScrollViewer ui object to load Source Item file</param>
-   /// <param name="sourceCoverage">Specifies Label ui object to show Source Coverage</param>
-   /// <param name="treeViewHandler">Specifies TreeViewHandler object</param>
-   /// <param name="mainWindow">Specifies Application MainWindow object</param>
+   /// <summary>Set Coverage Items to Tree View and initialzes the Source viewer</summary>
+   /// <param name="rootItem"> Coverage items to set Treeview</param>
+   /// <param name="sourceViewer"> Specifies FlowDocumentScrollViewer ui object to load Source Item file</param>
+   /// <param name="sourceCoverage"> Specifies Label ui object to show Source Coverage</param>
+   /// <param name="treeViewHandler"> Specifies TreeViewHandler object</param>
+   /// <param name="mainWindow"> Specifies Application MainWindow object</param>
    public void SetCoverage (Item.RootItem rootItem, 
                             FlowDocumentScrollViewer sourceViewer,
                             Label sourceCoverage,
-                            TreeViewHandler treeViewHandler,
+                            TreeViewUIHandler treeViewHandler,
                             Window window) {
       this.treeViewHandler = treeViewHandler;
       this.sourceCoverage = sourceCoverage;
@@ -158,11 +151,9 @@ class SourceViewerHandler {
       sourceViewer.Tag = null;
    }
 
-   /// <summary>
-   /// Loads a file (specified by filenName) into Source View and scroll to Line if lineNumber is given(not null)
-   /// </summary>
-   /// <param name="sourceItem">Specifies the sourceItem whose file name to load</param>
-   /// <param name="lineNo">Line no to scroll, otherwise null if required to scroll</param>
+   /// <summary> Loads a file (specified by filenName) into Source View and scroll to Line if lineNumber is given(not null)</summary>
+   /// <param name="sourceItem"> Specifies the sourceItem whose file name to load</param>
+   /// <param name="lineNo"> Line no to scroll, otherwise null if required to scroll</param>
    public void LoadSourceFile (Item.SourceItem sourceItem,
                                int lineNo = -1) {
       // Already loaded?
@@ -200,17 +191,15 @@ class SourceViewerHandler {
          //sv.ScrollToVerticalOffset (lineNo * lineHeight);
       }
    }
-   #endregion Methods ---------------------------------------------------------
+   #endregion Methods
 
    #region Implementation ----------------------------------------------------- 
-
-   /// <summary>
-   /// Split line and add highlight RangeItem Text Block to inLines
-   /// </summary>
-   /// <param name="inLines"></param>
-   /// <param name="line">Source Line text</param>
-   /// <param name="lineNo">Line in source </param>
-   /// <param name="lineNo2RangesParaMap">Source LineNo to Ranges Paragraph Map</param>
+   /// <summary> Split line and add highlight RangeItem Text Block to inLines</summary>
+   /// <param name="inLines">Paragraph inlines property to which 
+   /// xml node range text are created as Blocks</param>
+   /// <param name="line"> Source Line text</param>
+   /// <param name="lineNo"> Line in source </param>
+   /// <param name="lineNo2RangesParaMap"> Source LineNo to Ranges Paragraph Map</param>
    void highLightRange (InlineCollection inLines,
                         string line, int lineNo,
                         LineNo2RangesParaMap lineNo2RangesParaMap) {
@@ -281,12 +270,10 @@ class SourceViewerHandler {
       }
    }
 
-   /// <summary>
-   /// Reads source file and creates as paragraphs 
-   /// </summary>
-   /// <param name="flowDocument">FlowDocument object to add paragraphs(each line in source file)</param>
-   /// <param name="sourceItem">Specifies the sourceItem whose file name to load</param>
-   /// <returns>Returns true if successfully read source file otherwise false</returns>
+   /// <summary> Reads source file and creates as paragraphs </summary>
+   /// <param name="flowDocument"> FlowDocument object to add paragraphs(each line in source file)</param>
+   /// <param name="sourceItem"> Specifies the sourceItem whose file name to load</param>
+   /// <returns> Returns true if successfully read source file otherwise false</returns>
    private bool readSourceFileLines (FlowDocument flowDocument, Item.SourceItem sourceItem) {
       flowDocument.FontFamily = new FontFamily ("Courier");
       flowDocument.LineHeight = double.NaN;
@@ -333,25 +320,22 @@ class SourceViewerHandler {
 
       return success;
    }
-   #endregion Implementation --------------------------------------------------
+   #endregion Implementation
 
-   #region Private Data -------------------------------------------------------
-   TreeViewHandler treeViewHandler = null;
+   // region Private Data ----------------------------------------------------
+   TreeViewUIHandler treeViewHandler = null;
    FlowDocumentScrollViewer sourceViewer = null;
    Label sourceCoverage = null;
-   Window window = null;
-   #endregion Private Data ----------------------------------------------------
+   Window window = null;   
 }
-#endregion SourceViewerHandler class -----------------------------------------------
+#endregion SourceViewerHandler class ----------------------------------------------------
 
-#region Private classes ------------------------------------------------------------
-/// <summary>
-/// Class to hold RangeItem(s) and Paragraph
-/// </summary>
+#region Private classes -----------------------------------------------------------------
+/// <summary>Class to hold RangeItem(s) and Paragraph</summary>
 class RangesParagraph {
    internal List<Item.RangeItem> rangeItems = new ();
    internal Paragraph paragraph;
 }
 
 class LineNo2RangesParaMap : Dictionary<int, RangesParagraph> { }
-#endregion Private classes ---------------------------------------------------------
+#endregion Private classes --------------------------------------------------------------

@@ -8,14 +8,13 @@ using CodeCoverageViewer.Utility;
 
 namespace CodeCoverageViewer;
 
-#region class ViewDataContext ----------------------------------------------------------
+#region class ViewDataContext ------------------------------------------------------------
 /// <summary>
 /// ViewDataContext is data context class for MainWindow.xaml
 /// </summary>
 class ViewDataContext : ModelNotifyPropertyChanged {
-   #region Constructor ---------------------------------------------------------
+   // region Constructor -------------------------------------------------------
    public ViewDataContext () { }
-   #endregion
 
    #region Properties ----------------------------------------------------------
    private TreeView CoverageTree {
@@ -30,7 +29,7 @@ class ViewDataContext : ModelNotifyPropertyChanged {
          return mainWindow.SourceCoverage;
       }
    }
-   #endregion Properties -------------------------------------------------------
+   #endregion Properties 
 
    #region "FileOpenCommand"
    /// <summary>
@@ -61,7 +60,9 @@ class ViewDataContext : ModelNotifyPropertyChanged {
    }
 
    string coverageFilename = null;
-
+   /// <summary> Loads a Coverage Xml file
+   /// </summary>
+   /// <param name="fileName"> Specifies the Xml coverage filename</param>
    void loadCoverageFile (string fileName) {
       this.coverageFilename = fileName;
       // Loads Code Coveage informations
@@ -77,12 +78,10 @@ class ViewDataContext : ModelNotifyPropertyChanged {
       this.treeViewHandler.SetCoverage (rootItem, this.CoverageTree, this.sourceViewerHandler);
 
       MainWindow mainWindow = this.ui as MainWindow;
-      this.sourceViewerHandler.SetCoverage (rootItem, 
-                                            mainWindow.SourceViewer, this.SourceCoverage, 
+      this.sourceViewerHandler.SetCoverage (rootItem, mainWindow.SourceViewer, this.SourceCoverage, 
                                             this.treeViewHandler, (Window)this.ui);
 
    }
-
    #endregion "FileOpenCommand"
 
    #region "Recompute"
@@ -107,29 +106,26 @@ class ViewDataContext : ModelNotifyPropertyChanged {
    }
    #endregion 
 
-   #region Methods -------------------------------------------------------------
+   // region Methods ----------------------------------------------------------
    /// <summary>
    /// Initializes Coverage Tree with shortcut item to load report file
    /// </summary>
    public void InitCoverageTree () {
       TreeViewItem treeViewItem = this.treeViewHandler.InitCoverageTree (this.CoverageTree);
       treeViewItem.Selected += loadReport_Selected;
-   }
-   #endregion Methods ----------------------------------------------------------
+   }   
 
-   #region Implementation ------------------------------------------------------
+   // region Implementation ---------------------------------------------------
    /// <summary>
    /// Report file open shortcut Event handler 
    /// </summary>
    private void loadReport_Selected (object sender, RoutedEventArgs e) {
       this.FileOpen ();
-   }   
-   #endregion Implementation ---------------------------------------------------
+   }      
 
-   #region Private Data --------------------------------------------------------
+   // region Private Data -----------------------------------------------------
    public Window ui = null;
-   public Utility.TreeViewHandler treeViewHandler { get; } = new ();
-   private Utility.SourceViewerHandler sourceViewerHandler { get; } = new ();
-   #endregion
+   public Utility.TreeViewUIHandler treeViewHandler { get; } = new ();
+   private Utility.SourceViewerHandler sourceViewerHandler { get; } = new ();   
 }
-#endregion class ViewDataContext ----------------------------------------------------------
+#endregion class ViewDataContext -------------------------------------------------------

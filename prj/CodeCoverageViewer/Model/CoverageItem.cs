@@ -2,30 +2,21 @@
 
 namespace CodeCoverageViewer.Item;
 
-#region class RootItem -------------------------------------------------------------
+// region RootItem class ----------------------------------------------------------------
 internal class RootItem {
-   #region Data ---------------------------------------------------------------
-   public List<BaseItem> driveItems = new ();
-   #endregion Data ------------------------------------------------------------
+   public List<BaseItem> driveItems = new ();   
 }
-#endregion class RootItem -----------------------------------------------------------
 
-#region class BaseItem --------------------------------------------------------------
-internal class BaseItem : TreeViewItem {
-}
-#endregion class BaseItem -----------------------------------------------------------
+// region BaseItem class ----------------------------------------------------------------
+internal class BaseItem : TreeViewItem {}
 
-#region class ModuleItem -----------------------------------------------------------
+// region ModuleItem class --------------------------------------------------------------
 class ModuleItem  {
-   #region Data ---------------------------------------------------------------
-   public string blockCoverage;
-   #endregion Data ------------------------------------------------------------
+   public string blockCoverage;   
 }
-#endregion class ModuleItem --------------------------------------------------------
 
-#region class SourceItem -----------------------------------------------------------
+// region SourceItem class --------------------------------------------------------------
 class SourceItem : BaseItem {
-   #region Data ---------------------------------------------------------------
    public ModuleItem moduleItem = null;
 
    public string fileName;
@@ -33,19 +24,14 @@ class SourceItem : BaseItem {
    public List<RangeItem> rangeItems = new ();
 
    public string blockCoverage;
-   #endregion Data ------------------------------------------------------------
 }
-#endregion class SourceItem --------------------------------------------------------
 
-#region class RangeItem -------------------------------------------------------------
+// region RangeItem class ---------------------------------------------------------------
 class RangeItem {
-   #region Data ---------------------------------------------------------------
    public int startLine;
    public int startColumn;
    public int endLine;
    public int endColumn;
    public bool covered;
-   #endregion Data ------------------------------------------------------------
 }
-#endregion class RangeItem ---------------------------------------------------------
 
