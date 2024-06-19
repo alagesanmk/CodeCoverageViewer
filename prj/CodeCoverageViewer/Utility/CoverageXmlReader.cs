@@ -25,19 +25,16 @@ internal class Reader {
       XmlDocument xmlDoc = new XmlDocument ();
       try {
          xmlDoc.Load (fileName);
-         XmlNode docElement = xmlDoc.DocumentElement;
-
-         ModuleItem moduleItem;
 
          double blockCoverage;
          int blocksCovered, blocks;
          string moduleId, bc, bsc;
 
-         // Reads "module" nodes
-         foreach (XmlNode childsNode in docElement.ChildNodes) {
+         ModuleItem moduleItem;
+         XmlNode docElement = xmlDoc.DocumentElement;
+         foreach (XmlNode childsNode in docElement.ChildNodes) {  // Reads "module" nodes
             if ("modules" == childsNode.Name) {
-               // Reads source nodes and adds to sources
-               foreach (XmlNode moduleNode in childsNode.ChildNodes) {
+               foreach (XmlNode moduleNode in childsNode.ChildNodes) {  // Reads source nodes and adds to sources
                   if ("module" == moduleNode.Name) {                     
                      var attributes = moduleNode.Attributes;
                      moduleId = attributes["id"]?.Value;
@@ -46,13 +43,12 @@ internal class Reader {
 
                      bsc = attributes["blocks_covered"]?.Value;
                      blocksCovered = int.Parse (bsc);
-                     blocks = (int)(blocksCovered * 100.0 / blockCoverage);
+                     blocks = (int)(blocksCovered * 100.0 / blockCoverage);   // Total Block
 
                      moduleItem = this.createOrGetModuleItem(moduleMap, moduleId);
                      moduleItem.blockCoverage = $"{blocksCovered} / {blocks} : {blockCoverage}%";
 
                      this.parseModuleNode (rootItem, driveMap, folderMap, moduleNode, moduleItem);
-
                   }
                }
             }
@@ -67,7 +63,7 @@ internal class Reader {
    }
    #endregion Methods 
 
-   #region Implementation ----------------------------------------------------
+   #region Implementation -----------------------------------------------------
    /// <summary> Reads ModuleNode node attributes and descendants source_file/range nodes</summary>
    /// <param name="rootItem"> Root item to add Drive and descendants</param>
    /// <param name="driveMap"> Drive Letter to Drive Item map</param>
@@ -116,6 +112,7 @@ internal class Reader {
                               KeyItemMap driveMap, KeyItemMap folderMap,
                               KeyItemMap sourceIdMap, 
                               XmlNode moduleNode, ModuleItem moduleItem) {
+      SourceItem sourceItem;
       XmlNodeList sourceFileNodes = moduleNode.SelectNodes ("descendant::source_file");
       foreach (XmlNode sourceFileNode in sourceFileNodes) {
          // Read Attributes
@@ -123,10 +120,11 @@ internal class Reader {
          string sourceFileId = attributes["id"]?.Value;
          string sourceFilePath = attributes["path"]?.Value;
 
-         SourceItem sourceItem = this.splitSourceFileNode (rootItem, driveMap, folderMap, 
-                                                           sourceIdMap, sourceFileId, sourceFilePath,
-                                                           moduleItem);
-         this.updateSourceItemCoverge (sourceItem, sourceFileId, moduleNode, moduleItem);
+         sourceItem = this.splitSourceFileNode (rootItem, driveMap, folderMap, 
+                                                sourceIdMap, sourceFileId, sourceFilePath,
+                                                moduleItem);
+         if(null != sourceItem)
+            this.updateSourceItemCoverge (sourceItem, sourceFileId, moduleNode, moduleItem);
       }
    }
 
@@ -141,7 +139,8 @@ internal class Reader {
       int coveredBlock, notCoveredBlock;
       int blocks = 0, coveredBlocks = 0;
 
-      XmlNodeList functionNodes = moduleNode.SelectNodes ($"descendant::functions/function[ranges/range/@source_id='{sourceId}']");
+      XmlNodeList functionNodes = moduleNode.SelectNodes (
+                  $"descendant::functions/function[ranges/range/@source_id='{sourceId}']");
       foreach (XmlNode functionNode in functionNodes) {
          cb = functionNode.Attributes["blocks_covered"]?.Value;
          coveredBlock = int.Parse (cb);
@@ -169,36 +168,39 @@ internal class Reader {
    SourceItem splitSourceFileNode (RootItem rootItem, KeyItemMap driveMap, KeyItemMap folderMap,
                                    KeyItemMap sourceIdMap, string sourceFileId, string sourceFilePath,
                                    ModuleItem moduleItem) {
-      string key = "";
       SourceItem sourceItem = null;
-      BaseItem parentItem = null;
-      string[] tokens = sourceFilePath.Split ('\\');
-      int t = 0, tokenCount = tokens.Length;
-      foreach (string token in tokens) {
-         t++;
-         if (null == parentItem) {  // First is Drive item!!
-            if (tokens.Length < 1)
-               break; // Insufficient tokens
 
-            key = token;
-            parentItem = this.createOrGetItem (rootItem.driveItems, driveMap, token, key);
-            continue;
+      do {
+         string key = "";
+         BaseItem parentItem = null;
+         string[] tokens = sourceFilePath.Split ('\\');
+         if (tokens.Length <= 0)
+            break;                     // Insufficient tokens
+
+         int t = 0;
+         foreach (string token in tokens) {
+            t++;
+            if (null == parentItem) {  // First is Drive item!!
+               key = token;
+               parentItem = this.createOrGetItem (rootItem.driveItems, driveMap, token, key);
+               continue;
+            }
+
+            if (t == tokens.Length) {  // Last is Source item!!
+               sourceItem = new () {
+                  Header = token,
+                  fileName = sourceFilePath,
+                  moduleItem = moduleItem,
+               };
+
+               parentItem.Items.Add (sourceItem);
+               sourceIdMap[sourceFileId] = sourceItem;
+            } else {                   // Folder Item!!
+               key += "/" + token;
+               parentItem = this.createOrGetItem (parentItem.Items, folderMap, token, key);
+            }
          }
-
-         if (t == tokenCount) {     // Last is Source item!!
-            sourceItem = new () {
-               Header = token,
-               fileName = sourceFilePath,
-               moduleItem = moduleItem,
-            };
-
-            parentItem.Items.Add (sourceItem);
-            sourceIdMap[sourceFileId] = sourceItem;
-         } else {                      // Folder Item!!
-            key += "/" + token;
-            parentItem = this.createOrGetItem (parentItem.Items, folderMap, token, key);
-         }
-      }
+      } while (false);
 
       return sourceItem;
    }
@@ -211,7 +213,6 @@ internal class Reader {
    /// <returns> Created and existing Base item</returns>
    BaseItem createOrGetItem (dynamic items, KeyItemMap itemMap,
                              string name, string key) {
-
       BaseItem item = null;
       if (itemMap.ContainsKey (key))
          item = itemMap[key];
@@ -237,13 +238,11 @@ internal class Reader {
    /// <param name="id"> Key value to identify the exiting ModuleItem</param>
    /// <returns> Created and existing ModuleItem</returns>
    ModuleItem createOrGetModuleItem (ModuleMap moduleMap, string id) {
-
       ModuleItem moduleItem = null;
       if (moduleMap.ContainsKey (id))
          moduleItem = moduleMap[id];
       else {
          moduleItem = new ();
-
          moduleMap[id] = moduleItem;
       }
 
@@ -253,7 +252,6 @@ internal class Reader {
 
    // Nested class ------------------------------------------------------------
    class KeyItemMap : Dictionary<string, BaseItem> { }
-   class ModuleMap : Dictionary<string, ModuleItem> { }
-   
+   class ModuleMap : Dictionary<string, ModuleItem> { }   
 }
 #endregion Reader class -----------------------------------------------------------------

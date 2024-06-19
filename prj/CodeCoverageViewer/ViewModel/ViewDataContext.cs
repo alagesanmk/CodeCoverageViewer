@@ -11,40 +11,59 @@ namespace CodeCoverageViewer;
 #region ViewDataContext class ----------------------------------------------------------
 /// <summary> ViewDataContext is data context class for MainWindow.xaml</summary>
 class ViewDataContext : ModelNotifyPropertyChanged {
-   // Constructor -------------------------------------------------------------
-   public ViewDataContext () { }
-
-   // Properties --------------------------------------------------------------
-   private TreeView CoverageTree {
-      get {
-         MainWindow mainWindow = this.ui as MainWindow;
-         return mainWindow.CoverageItems;
-      }
-   }
-   private Label SourceBlocksStatusLb {
-      get {
-         MainWindow mainWindow = this.ui as MainWindow;
-         return mainWindow.SourceBlocksStatusLb;
-      }
-   }
-
+   #region Commands -----------------------------------------------------------
    #region "FileOpenCommand"
    /// <summary> File Open menu handler</summary>
    public ICommand FileOpenCommand {
       get {
          if (this.fileOpenCommand == null)
-            this.fileOpenCommand = new Base.Command (param => this.FileOpen (), null);
+            this.fileOpenCommand = new Base.Command (param => this.fileOpen ());
 
          return this.fileOpenCommand;
       }
    }
    private ICommand fileOpenCommand;
+   #endregion "FileOpenCommand"
 
+   #region "RecomputeCommand"
+   /// <summary> File Open menu handler</summary>
+   public ICommand RecomputeCommand {
+      get {
+         if (this.recomputeCommmand == null)
+            this.recomputeCommmand = new Base.Command (
+               param => {
+                  // Handles FileOpenCommand ----------------------------------------------
+                  if (null == this.coverageFilename)
+                     return;
+
+                  this.loadCoverageFile (this.coverageFilename);
+               }, 
+               canExcute => null != this.coverageFilename);
+
+         return this.recomputeCommmand;
+      }
+   }
+   private ICommand recomputeCommmand;
+   #endregion
+   #endregion
+
+   // Methods -----------------------------------------------------------------
+   /// <summary> Initializes UI object such as Tree, SourceView...</summary>
+   public void Init () {
+      TreeViewItem treeViewItem = this.treeViewHandler.InitCoverageTree (this.coverageTree, this.sourceViewerHandler);
+      treeViewItem.Selected += (s, e) => this.fileOpen ();      
+
+      MainWindow mainWindow = this.ui as MainWindow;
+      this.sourceViewerHandler.Init (mainWindow.SourceViewer, this.sourceBlocksStatusLb,
+                                     this.treeViewHandler, mainWindow);
+   }
+
+   #region Implementation -----------------------------------------------------
    /// <summary>
    /// File Open function is to select a Code Coverage report file and 
    /// loads report informations
    /// </summary>
-   public void FileOpen () {
+   public void fileOpen () {
       OpenFileDialog dialog = new OpenFileDialog ();
       dialog.Filter = "Code Coverage Reports|*.xml";
 
@@ -54,7 +73,6 @@ class ViewDataContext : ModelNotifyPropertyChanged {
       this.loadCoverageFile (dialog.FileName);
    }
 
-   string coverageFilename = null;
    /// <summary> Loads a Coverage Xml file</summary>
    /// <param name="fileName"> Specifies the Xml coverage filename</param>
    void loadCoverageFile (string fileName) {
@@ -73,48 +91,28 @@ class ViewDataContext : ModelNotifyPropertyChanged {
       this.sourceViewerHandler.SetCoverage (rootItem);
 
    }
-   #endregion "FileOpenCommand"
+   #endregion
 
-   #region "Recompute"
-   /// <summary> File Open menu handler</summary>
-   public ICommand RecomputeCommand {
+   #region Private Properties -------------------------------------------------
+   TreeView coverageTree {
       get {
-         if (this.recomputeCommmand == null)
-            this.recomputeCommmand = new Base.Command (param => this.Recompute (), 
-                                                       canExcute => null != this.coverageFilename);
-
-         return this.recomputeCommmand;
+         MainWindow mainWindow = this.ui as MainWindow;
+         return mainWindow.CoverageItems;
       }
    }
-   private ICommand recomputeCommmand;
-   public void Recompute () {
-      if (null == this.coverageFilename)
-         return;
-
-      this.loadCoverageFile (this.coverageFilename);
+   Label sourceBlocksStatusLb {
+      get {
+         MainWindow mainWindow = this.ui as MainWindow;
+         return mainWindow.SourceBlocksStatusLb;
+      }
    }
-   #endregion 
-
-   // Methods -----------------------------------------------------------------
-   /// <summary> Initializes UI object such as Tree, SourceView...</summary>
-   public void Init () {
-      TreeViewItem treeViewItem = this.treeViewHandler.InitCoverageTree (this.CoverageTree, this.sourceViewerHandler);
-      treeViewItem.Selected += loadReport_Selected;
-
-      MainWindow mainWindow = this.ui as MainWindow;
-      this.sourceViewerHandler.Init (mainWindow.SourceViewer, this.SourceBlocksStatusLb,
-                                     this.treeViewHandler, mainWindow);
-   }
-
-   // Implementation ----------------------------------------------------------
-   /// <summary> Report file open shortcut Event handler </summary>
-   private void loadReport_Selected (object sender, RoutedEventArgs e) {
-      this.FileOpen ();
-   }
+   #endregion
 
    // Private Data ------------------------------------------------------------
    public Window ui = null;
    public Utility.TreeViewHandler treeViewHandler { get; } = new ();
-   private Utility.SourceViewerHandler sourceViewerHandler { get; } = new ();   
+   private Utility.SourceViewerHandler sourceViewerHandler { get; } = new ();
+
+   string coverageFilename = null;
 }
 #endregion ViewDataContext class --------------------------------------------------------

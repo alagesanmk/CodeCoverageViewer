@@ -10,7 +10,7 @@ public class Command : ICommand {
    #region Constructor ---------------------------------------------------------
    public Command (Action<object> execute): this(execute, null) {}
 
-   public Command(Action<object> execute, Predicate<object> canExecute)
+   public Command(Action<object> execute, Predicate<object> canExecute=null)
    {
       if (execute == null)
             throw new ArgumentNullException("execute");

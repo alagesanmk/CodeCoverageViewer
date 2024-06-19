@@ -94,7 +94,11 @@ class TreeViewHandler {
       foreach (Item.BaseItem item in parentItem.Items) {
          Item.SourceItem sourceItem = item as Item.SourceItem;
          if (null != sourceItem) {
-            sourceItem.Selected += this.sourceItem_Selected;
+            // Set SourceItem Selected Event Handler ----------------
+            sourceItem.Selected += (sender, e) => {               
+               Item.SourceItem sourceItem = sender as Item.SourceItem;
+               this.sourceViewerHandler.LoadSourceFile (sourceItem);
+            };
 
             lineNo2RangesParaMap = null;
             foreach (var rangeItem in sourceItem.rangeItems) {
@@ -109,12 +113,6 @@ class TreeViewHandler {
          } else
             this.connectSourceItemEvent (item);
       }
-   }
-
-   /// <summary> Handler for Source Item Selected Event</summary>
-   void sourceItem_Selected (object sender, RoutedEventArgs e) {
-      Item.SourceItem sourceItem = sender as Item.SourceItem;
-      this.sourceViewerHandler.LoadSourceFile (sourceItem);
    }
    #endregion Implementation 
 
@@ -149,7 +147,7 @@ class SourceViewerHandler {
    public void SetCoverage (Item.RootItem rootItem) {
       // Set SourceViewer empty
       FlowDocument flowDocument = new FlowDocument ();
-      flowDocument.Background = SourceViewerHandler.srcBackgroundColor;
+      flowDocument.Background = Source.BackgroundColor;
       sourceViewer.Document = flowDocument;
       sourceViewer.Tag = null;
    }
@@ -190,8 +188,8 @@ class SourceViewerHandler {
       // No range item for this line
       Run run;
       if (null == rangesPara || 0 == rangesPara.rangeItems.Count) {
-         run = new Run (string.Format (SourceViewerHandler.lineNoFormat, lineNo));         
-         run.Foreground = SourceViewerHandler.lineNoBrush;
+         run = new Run (string.Format (Source.LineNoFormat, lineNo));         
+         run.Foreground = Source.LineNoBrush;
          inLines.Add (run);
 
          inLines.Add (line);
@@ -211,8 +209,8 @@ class SourceViewerHandler {
       foreach (Item.RangeItem rangeItem in rangesPara.rangeItems) {
          // Prepend Line No
          if (addLineNo) {
-            run = new Run (string.Format (SourceViewerHandler.lineNoFormat, lineNo));
-            run.Foreground = SourceViewerHandler.lineNoBrush;
+            run = new Run (string.Format (Source.LineNoFormat, lineNo));
+            run.Foreground = Source.LineNoBrush;
             inLines.Add (run);
             addLineNo = false;
          }
@@ -246,7 +244,8 @@ class SourceViewerHandler {
          rangeText = line.Substring (startColumn, length);
 
          run = new Run (rangeText);
-         run.Background = rangeItem.covered ? Brushes.DeepSkyBlue : Brushes.DarkOrange;
+         run.Background = rangeItem.covered ? Source.CoveredBackgroundColor 
+                                            : Source.NotCoveredBackgroundColor;
          inLines.Add (run);
          #endregion Range Part 
 
@@ -265,12 +264,14 @@ class SourceViewerHandler {
    /// <param name="sourceItem"> Specifies the sourceItem whose file name to load</param>
    /// <returns> Returns true if successfully read source file otherwise false</returns>
    private bool readSourceFileLines (FlowDocument flowDocument, Item.SourceItem sourceItem) {
-      flowDocument.FontFamily = new FontFamily (SourceViewerHandler.srcFontFamily);
+      flowDocument.FontFamily = new FontFamily (Source.FontFamily);
       flowDocument.LineHeight = double.NaN;
       flowDocument.Blocks.Clear ();
 
+      // Set SourceItem Block Coverage in Status
       this.sourceCoverageStatusLb.Content = sourceItem.blockCoverage;
 
+      // Set ModuleItem Block Coverage in Title
       Item.ModuleItem moduleItem = sourceItem.moduleItem;
       this.window.Title = $"{sourceItem.nameSpace}: {moduleItem.blockCoverage}";
 
@@ -278,14 +279,13 @@ class SourceViewerHandler {
       LineNo2RangesParaMap lineNo2RangesParaMap = null;
       try {
          using (StreamReader stream = File.OpenText (sourceItem.fileName)) {
-            stream.BaseStream.Seek (0, System.IO.SeekOrigin.Begin);
             string line;
             int lineNo = 1;
             while ((line = stream.ReadLine ()) != null) {
                Paragraph paragraph = new Paragraph ();
-               paragraph.Margin = new Thickness (0, 0, 0, 0);
-               paragraph.FontSize = SourceViewerHandler.srcFontSize;
-               paragraph.FontFamily = new FontFamily (SourceViewerHandler.srcFontFamily);
+               paragraph.Margin = new Thickness (0);
+               paragraph.FontSize = Source.FontSize;
+               paragraph.FontFamily = new FontFamily (Source.FontFamily);
                paragraph.Tag = lineNo;
 
                if(null == lineNo2RangesParaMap)
@@ -299,8 +299,6 @@ class SourceViewerHandler {
                flowDocument.Blocks.Add (paragraph);
                lineNo++;
             }
-
-            //this.lineNoLength = $"{lineNo}".Length;
          }
       } catch (Exception ex) {
          success = false;
@@ -313,15 +311,24 @@ class SourceViewerHandler {
    #endregion Implementation
 
    // Private Data -------------------------------------------------------------
-   static readonly SolidColorBrush srcBackgroundColor = Brushes.Gainsboro;
-   static readonly string srcFontFamily = "CONSOLAS";
-   static readonly double srcFontSize = 12;
-   static readonly Brush lineNoBrush = Brushes.Gray;
-   static readonly string lineNoFormat = $"{{0,5}}: ";
    TreeViewHandler treeViewHandler = null;
    FlowDocumentScrollViewer sourceViewer = null;
    Label sourceCoverageStatusLb = null;
-   Window window = null;      
+   Window window = null;
+
+   // Nested class ------------------------------------------------------------
+   // class to Definitions Soruce Styles
+   class Source {
+      internal static readonly double FontSize = 12;
+      internal static readonly string FontFamily = "CONSOLAS";
+      internal static readonly Brush LineNoBrush = Brushes.Gray;
+      internal static readonly SolidColorBrush BackgroundColor = Brushes.Gainsboro;
+
+      internal static readonly SolidColorBrush CoveredBackgroundColor = Brushes.DeepSkyBlue;
+      internal static readonly SolidColorBrush NotCoveredBackgroundColor = Brushes.DarkOrange;
+
+      internal static readonly string LineNoFormat = $"{{0,5}}: ";
+   }
 }
 #endregion SourceViewerHandler class ----------------------------------------------------
 
