@@ -14,20 +14,19 @@ class ViewDataContext : ModelNotifyPropertyChanged {
    // Constructor -------------------------------------------------------------
    public ViewDataContext () { }
 
-   #region Properties ---------------------------------------------------------
+   // Properties --------------------------------------------------------------
    private TreeView CoverageTree {
       get {
          MainWindow mainWindow = this.ui as MainWindow;
          return mainWindow.CoverageItems;
       }
    }
-   private Label SourceCoverage {
+   private Label SourceBlocksStatusLb {
       get {
          MainWindow mainWindow = this.ui as MainWindow;
-         return mainWindow.SourceCoverage;
+         return mainWindow.SourceBlocksStatusLb;
       }
    }
-   #endregion Properties 
 
    #region "FileOpenCommand"
    /// <summary> File Open menu handler</summary>
@@ -103,7 +102,7 @@ class ViewDataContext : ModelNotifyPropertyChanged {
       treeViewItem.Selected += loadReport_Selected;
 
       MainWindow mainWindow = this.ui as MainWindow;
-      this.sourceViewerHandler.Init (mainWindow.SourceViewer, this.SourceCoverage,
+      this.sourceViewerHandler.Init (mainWindow.SourceViewer, this.SourceBlocksStatusLb,
                                      this.treeViewHandler, mainWindow);
    }
 

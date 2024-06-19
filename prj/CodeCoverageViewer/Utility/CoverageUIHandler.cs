@@ -131,16 +131,16 @@ class SourceViewerHandler {
    #region Methods ------------------------------------------------------------
    /// <summary> Initializes SourceViewerHandler</summary>
    /// <param name="sourceViewer"> Specifies FlowDocumentScrollViewer ui object to load Source Item file</param>
-   /// <param name="sourceCoverage"> Specifies Label ui object to show Source Coverage</param>
+   /// <param name="sourceCoverageStatusLb"> Specifies Label ui object to show Source Coverage</param>
    /// <param name="treeViewHandler"> Specifies TreeViewHandler object</param>
    /// <param name="mainWindow"> Specifies Application MainWindow object</param>
    public void Init (FlowDocumentScrollViewer sourceViewer,
-                     Label sourceCoverageLb,
+                     Label sourceCoverageStatusLb,
                      TreeViewHandler treeViewHandler,
                      Window window) {
       this.sourceViewer = sourceViewer;
       this.treeViewHandler = treeViewHandler;
-      this.sourceCoverageLb = sourceCoverageLb;
+      this.sourceCoverageStatusLb = sourceCoverageStatusLb;
       this.window = window;
    }
 
@@ -149,7 +149,7 @@ class SourceViewerHandler {
    public void SetCoverage (Item.RootItem rootItem) {
       // Set SourceViewer empty
       FlowDocument flowDocument = new FlowDocument ();
-      flowDocument.Background = this.srcBackgroundColor;
+      flowDocument.Background = SourceViewerHandler.srcBackgroundColor;
       sourceViewer.Document = flowDocument;
       sourceViewer.Tag = null;
    }
@@ -208,8 +208,13 @@ class SourceViewerHandler {
                         LineNo2RangesParaMap lineNo2RangesParaMap) {
       RangesParagraph rangesPara = this.treeViewHandler.GetRangesPara (lineNo2RangesParaMap, lineNo);
       // No range item for this line
+      Run run;
       if (null == rangesPara || 0 == rangesPara.rangeItems.Count) {
-         inLines.Add ($"{lineNo}: {line}");
+         run = new Run (string.Format (this.lineNoFormat, lineNo));
+         run.Foreground = SourceViewerHandler.lineNoBrush;
+         inLines.Add (run);
+
+         inLines.Add (line);
          return;
       }
 
@@ -221,8 +226,9 @@ class SourceViewerHandler {
       foreach (Item.RangeItem rangeItem in rangeItems) {
          // Prepend Line No
          if (addLineNo) {
-            //inLines.Add ($"{lineNo,5}: "); // Bug: Not working :(
-            inLines.Add ($"{lineNo}: "); 
+            run = new Run (string.Format (this.lineNoFormat, lineNo));
+            run.Foreground = SourceViewerHandler.lineNoBrush;
+            inLines.Add (run);
             addLineNo = false;
          }
 
@@ -254,7 +260,7 @@ class SourceViewerHandler {
          length = endColumn - startColumn + 1;
          rangeText = line.Substring (startColumn, length);
 
-         Run run = new Run (rangeText);
+         run = new Run (rangeText);
          run.Background = rangeItem.covered ? Brushes.DeepSkyBlue : Brushes.DarkOrange;
          inLines.Add (run);
          #endregion Range Part 
@@ -274,11 +280,11 @@ class SourceViewerHandler {
    /// <param name="sourceItem"> Specifies the sourceItem whose file name to load</param>
    /// <returns> Returns true if successfully read source file otherwise false</returns>
    private bool readSourceFileLines (FlowDocument flowDocument, Item.SourceItem sourceItem) {
-      flowDocument.FontFamily = new FontFamily (this.srcFontFamily);
+      flowDocument.FontFamily = new FontFamily (SourceViewerHandler.srcFontFamily);
       flowDocument.LineHeight = double.NaN;
       flowDocument.Blocks.Clear ();
 
-      this.sourceCoverageLb.Content = sourceItem.blockCoverage;
+      this.sourceCoverageStatusLb.Content = sourceItem.blockCoverage;
 
       Item.ModuleItem moduleItem = sourceItem.moduleItem;
       this.window.Title = $"{sourceItem.nameSpace}: {moduleItem.blockCoverage}";
@@ -287,13 +293,22 @@ class SourceViewerHandler {
       LineNo2RangesParaMap lineNo2RangesParaMap = null;
       try {
          using (StreamReader stream = File.OpenText (sourceItem.fileName)) {
+
+            int lineCount = 0;
+            while (stream.ReadLine () != null)
+               lineCount++;
+
+            this.lineCountLen = $"{lineCount}".Length;
+            this.lineNoFormat = $"{{0,{this.lineCountLen}}}: ";
+
+            stream.BaseStream.Seek (0, System.IO.SeekOrigin.Begin);
             string line;
             int lineNo = 1;
             while ((line = stream.ReadLine ()) != null) {
                Paragraph paragraph = new Paragraph ();
                paragraph.Margin = new Thickness (0, 0, 0, 0);
-               paragraph.FontSize = this.srcFontSize;
-               paragraph.FontFamily = new FontFamily (this.srcFontFamily);
+               paragraph.FontSize = SourceViewerHandler.srcFontSize;
+               paragraph.FontFamily = new FontFamily (SourceViewerHandler.srcFontFamily);
                paragraph.Tag = lineNo;
 
                if(null == lineNo2RangesParaMap)
@@ -321,13 +336,16 @@ class SourceViewerHandler {
    #endregion Implementation
 
    // Private Data -------------------------------------------------------------
-   readonly SolidColorBrush srcBackgroundColor = Brushes.Gainsboro;
-   readonly string srcFontFamily = "Courier";
-   readonly double srcFontSize = 12;
+   static readonly SolidColorBrush srcBackgroundColor = Brushes.Gainsboro;
+   static readonly string srcFontFamily = "CONSOLAS";
+   static readonly double srcFontSize = 12;
+   static readonly Brush lineNoBrush = Brushes.DarkGray;
    TreeViewHandler treeViewHandler = null;
    FlowDocumentScrollViewer sourceViewer = null;
-   Label sourceCoverageLb = null;
-   Window window = null;   
+   Label sourceCoverageStatusLb = null;
+   Window window = null;
+   int lineCountLen = 0;
+   string lineNoFormat = null;
 }
 #endregion SourceViewerHandler class ----------------------------------------------------
 

@@ -24,7 +24,7 @@
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"></RowDefinition>
-                <RowDefinition Height="24"></RowDefinition>
+                <RowDefinition Height="28"></RowDefinition>
             </Grid.RowDefinitions>
             <TreeView x:Name="CoverageItems" 
                         Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
@@ -47,15 +47,16 @@
             </FlowDocumentScrollViewer>
             <Button Content="Recompute" 
                     Background="LightBlue" 
-                    Grid.Row="2" Grid.Column="2"
+                    Grid.Row="1" Grid.Column="2"
                     BorderThickness="0"
                     Margin="0,0,4,4" 
                     Command="{Binding RecomputeCommand}"
                     IsEnabled="{Binding RecomputeCommand}"/>
-            <Label x:Name="SourceCoverage" Content="" Background="Gainsboro"
-                   Grid.Row="2" Grid.Column="3" 
-                   Grid.ColumnSpan="2"
-                   Margin="0,0,4,4" />
+            <Label x:Name="SourceBlocksStatusLb" 
+                   Background="Gainsboro"
+                   Grid.Row="1" Grid.Column="3" 
+                   Grid.ColumnSpan="2"                   
+                   Margin="0,0,4,4" FontSize="10" />
         </Grid>
     </Grid>
 </Window>
