@@ -156,9 +156,7 @@ class SourceViewerHandler {
 
    /// <summary> Loads a file (specified by filenName) into Source View and scroll to Line if lineNumber is given(not null)</summary>
    /// <param name="sourceItem"> Specifies the sourceItem whose file name to load</param>
-   /// <param name="lineNo"> Line no to scroll, otherwise null if required to scroll</param>
-   public void LoadSourceFile (Item.SourceItem sourceItem,
-                               int lineNo = -1) {
+   public void LoadSourceFile (Item.SourceItem sourceItem) {
       // Already loaded?
       string oldFileName = sourceViewer.Tag as string;
       if (oldFileName != sourceItem.fileName) {
@@ -174,24 +172,6 @@ class SourceViewerHandler {
             MessageBox.Show ($"Loading source file failed: {ex.Message}", "Load Source Error",
                              MessageBoxButton.OK, MessageBoxImage.Error);
          }
-      }
-
-      // Bug: Not working ):
-      // Scroll to lineNumber
-      if (-1 != lineNo) {
-         LineNo2RangesParaMap lineNo2RangesParaMap = 
-               this.treeViewHandler.GetLineNo2RangesParaMap (sourceItem);
-         RangesParagraph rangesPara =
-               this.treeViewHandler.GetRangesPara (lineNo2RangesParaMap, lineNo);
-         if (null != rangesPara.paragraph)
-            rangesPara.paragraph.BringIntoView ();
-
-         return;
-
-         //ScrollViewer sv = sourceViewer.Template.FindName ("PART_ContentHost", sourceViewer) as ScrollViewer;
-         //sv.ScrollToBottom ();
-         //sv.ScrollToTop ();
-         //sv.ScrollToVerticalOffset (lineNo * lineHeight);
       }
    }
    #endregion Methods
@@ -222,8 +202,13 @@ class SourceViewerHandler {
       string rangeText = null;
       int length, lineLength = line.Length;
       int startColumn, endColumn, lineStartColumn = 0;
-      var rangeItems = rangesPara.rangeItems.OrderBy (range => range.startColumn).ToList ();
-      foreach (Item.RangeItem rangeItem in rangeItems) {
+
+      if (false == rangesPara.ordered) {
+         rangesPara.rangeItems = rangesPara.rangeItems.OrderBy (range => range.startColumn).ToList ();
+         rangesPara.ordered = true;
+      }
+
+      foreach (Item.RangeItem rangeItem in rangesPara.rangeItems) {
          // Prepend Line No
          if (addLineNo) {
             run = new Run (string.Format (SourceViewerHandler.lineNoFormat, lineNo));
@@ -332,7 +317,7 @@ class SourceViewerHandler {
    static readonly string srcFontFamily = "CONSOLAS";
    static readonly double srcFontSize = 12;
    static readonly Brush lineNoBrush = Brushes.Gray;
-   static string lineNoFormat = $"{{0,5}}: ";
+   static readonly string lineNoFormat = $"{{0,5}}: ";
    TreeViewHandler treeViewHandler = null;
    FlowDocumentScrollViewer sourceViewer = null;
    Label sourceCoverageStatusLb = null;
@@ -343,6 +328,7 @@ class SourceViewerHandler {
 #region Private classes -----------------------------------------------------------------
 /// <summary>Class to hold RangeItem(s) and Paragraph</summary>
 class RangesParagraph {
+   internal bool ordered = false;
    internal List<Item.RangeItem> rangeItems = new ();
    internal Paragraph paragraph;
 }
