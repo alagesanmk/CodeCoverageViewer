@@ -40,7 +40,7 @@
                         Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2"
                         Margin="0,4,4,4">
                 <FlowDocument Background="Gainsboro">
-                    <Paragraph TextAlignment="Center">
+                    <Paragraph TextAlignment="Center" FontFamily="CONSOLAS">
                         [Source View]
                     </Paragraph>
                 </FlowDocument>

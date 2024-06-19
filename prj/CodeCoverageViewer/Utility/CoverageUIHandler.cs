@@ -210,7 +210,7 @@ class SourceViewerHandler {
       // No range item for this line
       Run run;
       if (null == rangesPara || 0 == rangesPara.rangeItems.Count) {
-         run = new Run (string.Format (this.lineNoFormat, lineNo));
+         run = new Run (string.Format (SourceViewerHandler.lineNoFormat, lineNo));         
          run.Foreground = SourceViewerHandler.lineNoBrush;
          inLines.Add (run);
 
@@ -226,7 +226,7 @@ class SourceViewerHandler {
       foreach (Item.RangeItem rangeItem in rangeItems) {
          // Prepend Line No
          if (addLineNo) {
-            run = new Run (string.Format (this.lineNoFormat, lineNo));
+            run = new Run (string.Format (SourceViewerHandler.lineNoFormat, lineNo));
             run.Foreground = SourceViewerHandler.lineNoBrush;
             inLines.Add (run);
             addLineNo = false;
@@ -293,14 +293,6 @@ class SourceViewerHandler {
       LineNo2RangesParaMap lineNo2RangesParaMap = null;
       try {
          using (StreamReader stream = File.OpenText (sourceItem.fileName)) {
-
-            int lineCount = 0;
-            while (stream.ReadLine () != null)
-               lineCount++;
-
-            this.lineCountLen = $"{lineCount}".Length;
-            this.lineNoFormat = $"{{0,{this.lineCountLen}}}: ";
-
             stream.BaseStream.Seek (0, System.IO.SeekOrigin.Begin);
             string line;
             int lineNo = 1;
@@ -339,13 +331,12 @@ class SourceViewerHandler {
    static readonly SolidColorBrush srcBackgroundColor = Brushes.Gainsboro;
    static readonly string srcFontFamily = "CONSOLAS";
    static readonly double srcFontSize = 12;
-   static readonly Brush lineNoBrush = Brushes.DarkGray;
+   static readonly Brush lineNoBrush = Brushes.Gray;
+   static string lineNoFormat = $"{{0,5}}: ";
    TreeViewHandler treeViewHandler = null;
    FlowDocumentScrollViewer sourceViewer = null;
    Label sourceCoverageStatusLb = null;
-   Window window = null;
-   int lineCountLen = 0;
-   string lineNoFormat = null;
+   Window window = null;      
 }
 #endregion SourceViewerHandler class ----------------------------------------------------
 
