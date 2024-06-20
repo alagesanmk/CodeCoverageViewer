@@ -183,9 +183,7 @@ internal class Reader {
                key = token;
                parentItem = this.createOrGetItem (rootItem.DriveItems, driveMap, token, key);
                continue;
-            } 
-            
-            if (t == tokens.Length) {  // Last is Source item!!
+            } else if (t == tokens.Length) {  // Last is Source item!!
                parentItem.Items.Add(sourceIdMap[sourceFileId] = sourceItem = new SourceItem() {
                   Header = token,
                   FileName = sourceFilePath,
