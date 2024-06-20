@@ -9,7 +9,7 @@ using CodeCoverageViewer.Utility;
 namespace CodeCoverageViewer;
 
 #region ViewDataContext class ----------------------------------------------------------
-/// <summary> ViewDataContext is data context class for MainWindow.xaml</summary>
+/// <summary> Data context class for MainWindow.xaml</summary>
 class ViewDataContext : ModelNotifyPropertyChanged {
    #region Commands -----------------------------------------------------------
    // FileOpenCommand ---------------------------------------------------------

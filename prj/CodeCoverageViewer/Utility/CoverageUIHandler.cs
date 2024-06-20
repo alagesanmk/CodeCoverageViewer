@@ -141,17 +141,7 @@ class SourceViewerHandler {
       this.treeViewHandler = treeViewHandler;
       this.sourceCoverageStatusLb = sourceCoverageStatusLb;
       this.window = window;
-   }
-
-   /// <summary>Set Coverage Items to Tree View and initialzes the Source viewer</summary>
-   /// <param name="rootItem"> Coverage items to set Treeview. Note:Not used now, will be used if required</param>
-   public void SetCoverage (Item.RootItem rootItem) {
-      // Set SourceViewer empty
-      FlowDocument flowDocument = new FlowDocument ();
-      flowDocument.Background = Source.BackgroundColor;
-      sourceViewer.Document = flowDocument;
-      sourceViewer.Tag = null;
-   }
+   }   
 
    /// <summary>
    /// File Open function is to select a Code Coverage report file and 
@@ -164,39 +154,17 @@ class SourceViewerHandler {
       if (false == dialog.ShowDialog ())
          return;
 
-      this.OpenCoverageFile (dialog.FileName);
+      this.openCoverageFile (dialog.FileName);
    }
 
-   /// <summary> Opens a Coverage Xml file</summary>
-   /// <param name="coverageFilename "> Specifies the Xml coverage filename</param>
-   public void OpenCoverageFile (string coverageFilename) {
-      this.coverageFilename = coverageFilename;
-      // Loads Code Coveage informations
-      Reader reader = new ();
-      Item.RootItem rootItem = reader.Read (this.coverageFilename);
-      if (null == rootItem) {
-         MessageBox.Show (reader.Error, "Code Coverage Report File Read Error",
-                          MessageBoxButton.OK, MessageBoxImage.Error);
-         return;
-      }
-
-      // Set coverage items to TreeView, SourceViewer
-      this.treeViewHandler.SetCoverage (rootItem);
-      this.SetCoverage (rootItem);
+   /// <summary> Recomputes / loads Coverage file again</summary>
+   public void Recompute () { 
+      if (null != this.coverageFilename)
+         this.openCoverageFile (this.coverageFilename);
    }
 
-   public void Recompute() {
-      // Handles FileOpenCommand ----------------------------------------------
-      if (null == this.coverageFilename)
-         return;
-
-      this.OpenCoverageFile (this.coverageFilename);
-   }
-
-   public bool CanRecompute () {
-      return null != this.coverageFilename;
-   }
-   
+   /// <summary> Return true if Coverage File already loaded and can Recompute / load Coverage file again</summary>
+   public bool CanRecompute () => null != this.coverageFilename;
 
    /// <summary> Loads a file (specified by filenName) into Source View and scroll to Line if lineNumber is given(not null)</summary>
    /// <param name="sourceItem"> Specifies the sourceItem whose file name to load</param>
@@ -221,6 +189,30 @@ class SourceViewerHandler {
    #endregion Methods
 
    #region Implementation ----------------------------------------------------- 
+   /// <summary> Opens a Coverage Xml file</summary>
+   /// <param name="coverageFilename "> Specifies the Xml coverage filename</param>
+   void openCoverageFile (string coverageFilename) {
+      this.coverageFilename = coverageFilename;
+      // Loads Code Coveage informations
+      Reader reader = new ();
+      Item.RootItem rootItem = reader.Read (this.coverageFilename);
+      if (null == rootItem) {
+         MessageBox.Show (reader.Error, "Code Coverage Report File Read Error",
+                          MessageBoxButton.OK, MessageBoxImage.Error);
+         return;
+      }
+
+      // Set coverage items to TreeView
+      this.treeViewHandler.SetCoverage (rootItem);
+      
+      // Reset Source View document
+      FlowDocument flowDocument = new FlowDocument ();
+      flowDocument.Background = Source.BackgroundColor;
+      sourceViewer.Document = flowDocument;
+      sourceViewer.Tag = null;
+   }
+
+   
    /// <summary> Split line and add highlight RangeItem Text Block to inLines</summary>
    /// <param name="inLines">Paragraph inlines property to which 
    /// xml node range text are created as Blocks</param>
