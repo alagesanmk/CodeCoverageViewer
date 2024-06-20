@@ -1,10 +1,7 @@
-﻿using Microsoft.Win32;
-using System.Windows;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows.Input;
 
 using CodeCoverageViewer.Base;
-using CodeCoverageViewer.Utility;
 
 namespace CodeCoverageViewer;
 
@@ -42,7 +39,7 @@ class ViewDataContext : ModelNotifyPropertyChanged {
    // Methods -----------------------------------------------------------------
    /// <summary> Initializes UI object such as Tree, SourceView...</summary>
    public void Init () {
-      TreeViewItem treeViewItem = this.treeViewHandler.InitCoverageTree (this.mainWindow.CoverageItems, this.sourceViewerHandler);
+      TreeViewItem treeViewItem = this.treeViewHandler.InitCoverageTree (this.mainWindow.CoverageTreeView, this.sourceViewerHandler);
       treeViewItem.Selected += (s, e) => this.sourceViewerHandler.FileOpen ();      
 
       this.sourceViewerHandler.Init (mainWindow.SourceViewer, this.mainWindow.SourceBlocksStatusLb,

@@ -7,11 +7,11 @@ namespace CodeCoverageViewer;
 /// </summary>
 public partial class MainWindow : Window {
 
-   ViewDataContext viewModelContext = new ViewDataContext();
+   ViewDataContext viewModelContext = new ();
    public MainWindow () {
       InitializeComponent ();
       this.DataContext = this.viewModelContext;
-      this.viewModelContext.ui = this;
+      this.viewModelContext.mainWindow = this;
       this.viewModelContext.Init ();
    }
 }

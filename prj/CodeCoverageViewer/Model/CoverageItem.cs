@@ -4,7 +4,7 @@ namespace CodeCoverageViewer.Item;
 
 // RootItem class -----------------------------------------------------------------------
 internal class RootItem {
-   public List<BaseItem> driveItems = new ();   
+   public List<BaseItem> DriveItems = new ();   
 }
 
 // BaseItem class -----------------------------------------------------------------------
@@ -12,26 +12,26 @@ internal class BaseItem : TreeViewItem {}
 
 // ModuleItem class ---------------------------------------------------------------------
 class ModuleItem  {
-   public string blockCoverage;   
+   public string BlockCoverage;   
 }
 
 // SourceItem class ---------------------------------------------------------------------
 class SourceItem : BaseItem {
-   public ModuleItem moduleItem = null;
+   public ModuleItem ModuleItem = null;
 
-   public string fileName;
-   public string nameSpace;
-   public List<RangeItem> rangeItems = new ();
+   public string FileName;
+   public string NameSpace;
+   public List<RangeItem> RangeItems = new ();
 
-   public string blockCoverage;
+   public string BlockCoverage;
 }
 
 // RangeItem class ----------------------------------------------------------------------
 class RangeItem {
-   public int startLine;
-   public int startColumn;
-   public int endLine;
-   public int endColumn;
+   public int StartLine;
+   public int StartColumn;
+   public int EndLine;
+   public int EndColumn;
    public bool covered;
 }
 

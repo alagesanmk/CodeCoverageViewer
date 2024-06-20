@@ -32,11 +32,11 @@ class TreeViewHandler {
    public void SetCoverage(Item.RootItem rootItem) {
       this.coverageTree.Items.Clear();
 
-      foreach (var item in rootItem.driveItems) {
+      foreach (var item in rootItem.DriveItems) {
          this.coverageTree.Items.Add(item);
          item.ExpandSubtree();
 
-         this.connectSourceItemEvent(item);
+         this.connectSourceItemEvent (item);
       }
    }
 
@@ -72,7 +72,7 @@ class TreeViewHandler {
    public RangesParagraph GetRangesPara (LineNo2RangesParaMap lineNo2RangesParaMap,
                                          int lineNo, bool create = false) {
       RangesParagraph rangesPara = null;
-      if (lineNo2RangesParaMap.TryGetValue(lineNo, out rangesPara) != false)
+      if (lineNo2RangesParaMap.TryGetValue(lineNo, out rangesPara) == false)
          lineNo2RangesParaMap[lineNo] = rangesPara = rangesPara = new();
 
       return rangesPara;
@@ -94,9 +94,9 @@ class TreeViewHandler {
             };
 
             lineNo2RangesParaMap = null;
-            foreach (var rangeItem in sourceItem.rangeItems) {
-               for (int lineNo = rangeItem.startLine; lineNo <= rangeItem.endLine; lineNo++) {
-                  if(lineNo2RangesParaMap != null)
+            foreach (var rangeItem in sourceItem.RangeItems) {
+               for (int lineNo = rangeItem.StartLine; lineNo <= rangeItem.EndLine; lineNo++) {
+                  if(lineNo2RangesParaMap == null)
                      lineNo2RangesParaMap = this.GetLineNo2RangesParaMap (sourceItem, true);
 
                   RangesParagraph rangesPara = this.GetRangesPara (lineNo2RangesParaMap, lineNo, true);
@@ -166,11 +166,11 @@ class SourceViewerHandler {
    public void LoadSourceFile (Item.SourceItem sourceItem) {
       // Already loaded?
       string oldFileName = this.sourceViewer.Tag as string;
-      if (oldFileName != sourceItem.fileName) {
+      if (oldFileName != sourceItem.FileName) {
          // Load source file
          try {
             if (this.readSourceFileLines (sourceItem))
-               sourceViewer.Tag = sourceItem.fileName;
+               this.sourceViewer.Tag = sourceItem.FileName;
          } catch (Exception ex) {
             MessageBox.Show ($"Loading source file failed: {ex.Message}", "Load Source Error",
                              MessageBoxButton.OK, MessageBoxImage.Error);
@@ -196,7 +196,7 @@ class SourceViewerHandler {
 
       // Set coverage items to TreeView
       this.treeViewHandler.SetCoverage (rootItem);
-      sourceViewer.Tag = null;
+      this.sourceViewer.Tag = null;
    }
    
    /// <summary> Split line and add highlight RangeItem Text Block to inLines</summary>
@@ -210,11 +210,10 @@ class SourceViewerHandler {
                         LineNo2RangesParaMap lineNo2RangesParaMap) {
       RangesParagraph rangesPara = this.treeViewHandler.GetRangesPara (lineNo2RangesParaMap, lineNo);
       // No range item for this line
-      Run run;
-      if (null == rangesPara || 0 == rangesPara.rangeItems.Count) {
-         run = new Run (string.Format (Source.LineNoFormat, lineNo));         
-         run.Foreground = Source.LineNoBrush;
-         inLines.Add (run);
+      if (rangesPara == null || rangesPara.rangeItems.Count == 0) {
+         inLines.Add (new Run (string.Format (Source.LineNoFormat, lineNo)) {
+            Foreground = Source.LineNoBrush
+         });
 
          inLines.Add (line);
          return;
@@ -226,7 +225,7 @@ class SourceViewerHandler {
       int startColumn, endColumn, lineStartColumn = 0;
 
       if (false == rangesPara.ordered) {
-         rangesPara.rangeItems = rangesPara.rangeItems.OrderBy (range => range.startColumn).ToList ();
+         rangesPara.rangeItems = rangesPara.rangeItems.OrderBy (range => range.StartColumn).ToList ();
          rangesPara.ordered = true;
       }
 
@@ -238,17 +237,17 @@ class SourceViewerHandler {
             addLineNo = false;
          }
 
-         int _startColumn = rangeItem.startColumn - 1;
-         int _endColumn = rangeItem.endColumn - 2;
+         int _startColumn = rangeItem.StartColumn - 1;
+         int _endColumn = rangeItem.EndColumn - 2;
 
          #region Range Part
-         if (rangeItem.startLine == rangeItem.endLine) {    // One line
+         if (rangeItem.StartLine == rangeItem.EndLine) {    // One line
             startColumn = _startColumn;
             endColumn = _endColumn;
-         } else if (lineNo == rangeItem.startLine) {        // Start line
+         } else if (lineNo == rangeItem.StartLine) {        // Start line
             startColumn = _startColumn;
             endColumn = lineLength - 1;
-         } else if (lineNo == rangeItem.endLine) {          // End line
+         } else if (lineNo == rangeItem.EndLine) {          // End line
             startColumn = 0;
             endColumn = _endColumn;
          } else {                                           // Middle line
@@ -290,16 +289,16 @@ class SourceViewerHandler {
       flowDocument.Blocks.Clear ();
 
       // Set SourceItem Block Coverage in Status
-      this.sourceCoverageStatusLb.Content = sourceItem.blockCoverage;
+      this.sourceCoverageStatusLb.Content = sourceItem.BlockCoverage;
 
       // Set ModuleItem Block Coverage in Title
-      Item.ModuleItem moduleItem = sourceItem.moduleItem;
-      this.window.Title = $"{sourceItem.nameSpace}: {moduleItem.blockCoverage}";
+      Item.ModuleItem moduleItem = sourceItem.ModuleItem;
+      this.window.Title = $"{sourceItem.NameSpace}: {moduleItem.BlockCoverage}";
 
       bool success = true;
       LineNo2RangesParaMap lineNo2RangesParaMap = null;
       try {
-         using (StreamReader stream = File.OpenText (sourceItem.fileName)) {
+         using (StreamReader stream = File.OpenText (sourceItem.FileName)) {
             string line;
             int lineNo = 1;
             while ((line = stream.ReadLine ()) != null) {
@@ -310,7 +309,7 @@ class SourceViewerHandler {
                   Tag = lineNo
                };
 
-               if(null == lineNo2RangesParaMap)
+               if(lineNo2RangesParaMap == null)
                   lineNo2RangesParaMap = this.treeViewHandler.GetLineNo2RangesParaMap (sourceItem, true);
 
                this.highLightRange (paragraph.Inlines, line, lineNo, lineNo2RangesParaMap);
@@ -361,7 +360,7 @@ class SourceViewerHandler {
 class RangesParagraph {
    internal bool ordered = false;
    internal List<Item.RangeItem> rangeItems = new ();
+
    internal Paragraph paragraph;
 }
-
 #endregion Private classes --------------------------------------------------------------

@@ -26,7 +26,7 @@
                 <RowDefinition Height="*"></RowDefinition>
                 <RowDefinition Height="28"></RowDefinition>
             </Grid.RowDefinitions>
-            <TreeView x:Name="CoverageItems" 
+            <TreeView x:Name="CoverageTreeView" 
                         Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"
                         ItemsSource="{Binding Coverages}" Margin="4,4,0,4" 
                         BorderBrush="{x:Null}" BorderThickness="0"

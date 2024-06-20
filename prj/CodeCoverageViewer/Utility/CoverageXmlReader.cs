@@ -49,7 +49,7 @@ internal class Reader {
                notBlocksCovered = int.Parse(nbsc);
 
                moduleItem = this.createOrGetModuleItem(moduleMap, moduleId);
-               moduleItem.blockCoverage = $"{blocksCovered} / {notBlocksCovered + blocksCovered} : {blockCoverage}%";
+               moduleItem.BlockCoverage = $"{blocksCovered} / {notBlocksCovered + blocksCovered} : {blockCoverage}%";
 
                this.parseModuleNode (rootItem, driveMap, folderMap, moduleNode, moduleItem);
             }
@@ -87,17 +87,17 @@ internal class Reader {
 
          SourceItem sourceItem = sourceIdMap[rangeId] as SourceItem;
          RangeItem rangeItem = new () {
-            startLine = int.Parse (attributes["start_line"]?.Value),
-            startColumn = int.Parse (attributes["start_column"]?.Value),
-            endLine = int.Parse (attributes["end_line"]?.Value),
-            endColumn = int.Parse (attributes["end_column"]?.Value),
+            StartLine = int.Parse (attributes["start_line"]?.Value),
+            StartColumn = int.Parse (attributes["start_column"]?.Value),
+            EndLine = int.Parse (attributes["end_line"]?.Value),
+            EndColumn = int.Parse (attributes["end_column"]?.Value),
             covered = "yes" == attributes["covered"]?.Value.ToLower (),
          };
 
-         sourceItem.rangeItems.Add (rangeItem);
-         if (sourceItem.rangeItems.Count == 1) {   // First rangeItem?
+         sourceItem.RangeItems.Add (rangeItem);
+         if (sourceItem.RangeItems.Count == 1) {   // First rangeItem?
             XmlNode functionNode = rangeNode.ParentNode.ParentNode;
-            sourceItem.nameSpace = functionNode.Attributes["namespace"]?.Value ?? "None";
+            sourceItem.NameSpace = functionNode.Attributes["namespace"]?.Value ?? "None";
          }
       }
    }
@@ -153,7 +153,7 @@ internal class Reader {
       }
 
       double coveredBlockPercent = (double)coveredBlocks / blocks;
-      sourceItem.blockCoverage = $"{coveredBlocks} / {blocks} : {coveredBlockPercent}%";
+      sourceItem.BlockCoverage = $"{coveredBlocks} / {blocks} : {coveredBlockPercent}%";
    }
 
    /// <summary> Splits path name to Drive, Folder and Source and adds to rootItem</summary>
@@ -179,15 +179,17 @@ internal class Reader {
          int t = 0;
          foreach (string token in tokens) {
             t++;
-            if (parentItem != null) {  // First is Drive item!!
+            if (parentItem == null) {  // First is Drive item!!
                key = token;
-               parentItem = this.createOrGetItem (rootItem.driveItems, driveMap, token, key);
+               parentItem = this.createOrGetItem (rootItem.DriveItems, driveMap, token, key);
                continue;
-            } else if (t == tokens.Length) {  // Last is Source item!!
+            } 
+            
+            if (t == tokens.Length) {  // Last is Source item!!
                parentItem.Items.Add(sourceIdMap[sourceFileId] = sourceItem = new SourceItem() {
                   Header = token,
-                  fileName = sourceFilePath,
-                  moduleItem = moduleItem,
+                  FileName = sourceFilePath,
+                  ModuleItem = moduleItem,
                });
             } else {                   // Folder Item!!
                key += "/" + token;
@@ -208,9 +210,13 @@ internal class Reader {
    BaseItem createOrGetItem (dynamic items, KeyItemMap itemMap,
                              string name, string key) {
       BaseItem item = null;
-      if(itemMap.TryGetValue(key, out item) == false)
+      if (itemMap.TryGetValue (key, out item) == false) {
          itemMap[key] = item = new () {
-            Header = name };
+            Header = name
+         };
+
+         items.Add (item);
+      }
            
       return item;
    }

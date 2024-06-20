@@ -3,9 +3,7 @@
 namespace CodeCoverageViewer.Base;
 
 #region Command class -------------------------------------------------------------------
-/// <summary>
-/// Base class to use in Xaml Binding Command
-/// </summary>
+/// <summary> Base class to use in Xaml Binding Command</summary>
 public class Command : ICommand {
    #region Constructor ---------------------------------------------------------
    public Command (Action<object> execute): this(execute, null) {}
