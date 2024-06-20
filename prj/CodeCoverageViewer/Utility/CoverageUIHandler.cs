@@ -7,6 +7,8 @@ using Microsoft.Win32;
 
 namespace CodeCoverageViewer.Utility;
 
+using LineNo2RangesParaMap = Dictionary<int, RangesParagraph>;
+
 #region TreeViewHandler class ------------------------------------------------------------
 /// <summary> An UI handler class for TreeView</summary>
 class TreeViewHandler {
@@ -27,17 +29,15 @@ class TreeViewHandler {
 
    /// <summary Set Coverage Items to Tree View and initialzes the Source viewer</summary>
    /// <param name="rootItem"> Coverage items to set Treeview</param>
-   public void SetCoverage (Item.RootItem rootItem) {
-      // Set to TreeView
-      this.coverageTree.Items.Clear ();
-      foreach (var item in rootItem.driveItems) {
-         this.coverageTree.Items.Add (item);
-         item.ExpandSubtree ();
-      }
+   public void SetCoverage(Item.RootItem rootItem) {
+      this.coverageTree.Items.Clear();
 
-      // Connect Events for source_file
-      foreach (Item.BaseItem item in rootItem.driveItems)
-         this.connectSourceItemEvent (item);
+      foreach (var item in rootItem.driveItems) {
+         this.coverageTree.Items.Add(item);
+         item.ExpandSubtree();
+
+         this.connectSourceItemEvent(item);
+      }
    }
 
    /// <summary>
@@ -52,12 +52,8 @@ class TreeViewHandler {
    /// </returns>
    public LineNo2RangesParaMap GetLineNo2RangesParaMap (Item.SourceItem sourceItem, bool create = false) {
       LineNo2RangesParaMap lineNo2RangesParaMap;
-      if (this.source2RangesParaMap.ContainsKey (sourceItem))
-         lineNo2RangesParaMap = this.source2RangesParaMap[sourceItem];
-      else {
-         lineNo2RangesParaMap = new ();
-         this.source2RangesParaMap[sourceItem] = lineNo2RangesParaMap;
-      }
+      if (this.source2RangesParaMap.TryGetValue (sourceItem, out lineNo2RangesParaMap) == false)
+         this.source2RangesParaMap[sourceItem] = lineNo2RangesParaMap = new();
 
       return lineNo2RangesParaMap;
    }
@@ -76,12 +72,8 @@ class TreeViewHandler {
    public RangesParagraph GetRangesPara (LineNo2RangesParaMap lineNo2RangesParaMap,
                                          int lineNo, bool create = false) {
       RangesParagraph rangesPara = null;
-      if (lineNo2RangesParaMap.ContainsKey (lineNo))
-         rangesPara = lineNo2RangesParaMap[lineNo];
-      else if(create) {
-         rangesPara = new ();
-         lineNo2RangesParaMap[lineNo] = rangesPara;
-      }
+      if (lineNo2RangesParaMap.TryGetValue(lineNo, out rangesPara) != false)
+         lineNo2RangesParaMap[lineNo] = rangesPara = rangesPara = new();
 
       return rangesPara;
    }
@@ -94,7 +86,7 @@ class TreeViewHandler {
       LineNo2RangesParaMap lineNo2RangesParaMap = null;
       foreach (Item.BaseItem item in parentItem.Items) {
          Item.SourceItem sourceItem = item as Item.SourceItem;
-         if (null != sourceItem) {
+         if (sourceItem != null) {
             // Set SourceItem Selected Event Handler ----------------
             sourceItem.Selected += (sender, e) => {               
                Item.SourceItem sourceItem = sender as Item.SourceItem;
@@ -104,7 +96,7 @@ class TreeViewHandler {
             lineNo2RangesParaMap = null;
             foreach (var rangeItem in sourceItem.rangeItems) {
                for (int lineNo = rangeItem.startLine; lineNo <= rangeItem.endLine; lineNo++) {
-                  if(null == lineNo2RangesParaMap)
+                  if(lineNo2RangesParaMap != null)
                      lineNo2RangesParaMap = this.GetLineNo2RangesParaMap (sourceItem, true);
 
                   RangesParagraph rangesPara = this.GetRangesPara (lineNo2RangesParaMap, lineNo, true);
@@ -141,6 +133,12 @@ class SourceViewerHandler {
       this.treeViewHandler = treeViewHandler;
       this.sourceCoverageStatusLb = sourceCoverageStatusLb;
       this.window = window;
+
+      this.sourceViewer.Document = new FlowDocument() {
+         Background = Source.BackgroundColor,
+         FontFamily = new FontFamily(Source.FontFamily),
+         LineHeight = double.NaN
+      };
    }   
 
    /// <summary>
@@ -148,38 +146,31 @@ class SourceViewerHandler {
    /// loads report informations
    /// </summary>
    public void FileOpen () {
-      OpenFileDialog dialog = new OpenFileDialog ();
-      dialog.Filter = "Code Coverage Reports|*.xml";
-
-      if (false == dialog.ShowDialog ())
-         return;
-
-      this.openCoverageFile (dialog.FileName);
+      OpenFileDialog dialog = new OpenFileDialog() {
+         Filter = "Code Coverage Reports|*.xml" };
+      if (dialog.ShowDialog () == true)
+         this.openCoverageFile (dialog.FileName);
    }
 
    /// <summary> Recomputes / loads Coverage file again</summary>
    public void Recompute () { 
-      if (null != this.coverageFilename)
+      if (this.coverageFilename != null)
          this.openCoverageFile (this.coverageFilename);
    }
 
    /// <summary> Return true if Coverage File already loaded and can Recompute / load Coverage file again</summary>
-   public bool CanRecompute () => null != this.coverageFilename;
+   public bool CanRecompute () => this.coverageFilename != null;
 
    /// <summary> Loads a file (specified by filenName) into Source View and scroll to Line if lineNumber is given(not null)</summary>
    /// <param name="sourceItem"> Specifies the sourceItem whose file name to load</param>
    public void LoadSourceFile (Item.SourceItem sourceItem) {
       // Already loaded?
-      string oldFileName = sourceViewer.Tag as string;
+      string oldFileName = this.sourceViewer.Tag as string;
       if (oldFileName != sourceItem.fileName) {
-
          // Load source file
          try {
-            FlowDocument flowDocument = sourceViewer.Document;
-            if (!this.readSourceFileLines (flowDocument, sourceItem))
-               return;
-
-            sourceViewer.Tag = sourceItem.fileName;
+            if (this.readSourceFileLines (sourceItem))
+               sourceViewer.Tag = sourceItem.fileName;
          } catch (Exception ex) {
             MessageBox.Show ($"Loading source file failed: {ex.Message}", "Load Source Error",
                              MessageBoxButton.OK, MessageBoxImage.Error);
@@ -193,10 +184,11 @@ class SourceViewerHandler {
    /// <param name="coverageFilename "> Specifies the Xml coverage filename</param>
    void openCoverageFile (string coverageFilename) {
       this.coverageFilename = coverageFilename;
+
       // Loads Code Coveage informations
       Reader reader = new ();
       Item.RootItem rootItem = reader.Read (this.coverageFilename);
-      if (null == rootItem) {
+      if (rootItem == null) {
          MessageBox.Show (reader.Error, "Code Coverage Report File Read Error",
                           MessageBoxButton.OK, MessageBoxImage.Error);
          return;
@@ -204,14 +196,8 @@ class SourceViewerHandler {
 
       // Set coverage items to TreeView
       this.treeViewHandler.SetCoverage (rootItem);
-      
-      // Reset Source View document
-      FlowDocument flowDocument = new FlowDocument ();
-      flowDocument.Background = Source.BackgroundColor;
-      sourceViewer.Document = flowDocument;
       sourceViewer.Tag = null;
    }
-
    
    /// <summary> Split line and add highlight RangeItem Text Block to inLines</summary>
    /// <param name="inLines">Paragraph inlines property to which 
@@ -247,9 +233,8 @@ class SourceViewerHandler {
       foreach (Item.RangeItem rangeItem in rangesPara.rangeItems) {
          // Prepend Line No
          if (addLineNo) {
-            run = new Run (string.Format (Source.LineNoFormat, lineNo));
-            run.Foreground = Source.LineNoBrush;
-            inLines.Add (run);
+            inLines.Add (new Run(string.Format(Source.LineNoFormat, lineNo)) {
+               Foreground = Source.LineNoBrush });
             addLineNo = false;
          }
 
@@ -281,10 +266,9 @@ class SourceViewerHandler {
          length = endColumn - startColumn + 1;
          rangeText = line.Substring (startColumn, length);
 
-         run = new Run (rangeText);
-         run.Background = rangeItem.covered ? Source.CoveredBackgroundColor 
-                                            : Source.NotCoveredBackgroundColor;
-         inLines.Add (run);
+         inLines.Add (new Run(rangeText) {
+            Background = rangeItem.covered ? Source.CoveredBackgroundColor
+                                           : Source.NotCoveredBackgroundColor });
          #endregion Range Part 
 
          lineStartColumn = endColumn + 1; // Range endColumn is lineStartColumn for next Range
@@ -301,9 +285,8 @@ class SourceViewerHandler {
    /// <param name="flowDocument"> FlowDocument object to add paragraphs(each line in source file)</param>
    /// <param name="sourceItem"> Specifies the sourceItem whose file name to load</param>
    /// <returns> Returns true if successfully read source file otherwise false</returns>
-   private bool readSourceFileLines (FlowDocument flowDocument, Item.SourceItem sourceItem) {
-      flowDocument.FontFamily = new FontFamily (Source.FontFamily);
-      flowDocument.LineHeight = double.NaN;
+   private bool readSourceFileLines (Item.SourceItem sourceItem) {
+      FlowDocument flowDocument = this.sourceViewer.Document;
       flowDocument.Blocks.Clear ();
 
       // Set SourceItem Block Coverage in Status
@@ -320,11 +303,12 @@ class SourceViewerHandler {
             string line;
             int lineNo = 1;
             while ((line = stream.ReadLine ()) != null) {
-               Paragraph paragraph = new Paragraph ();
-               paragraph.Margin = new Thickness (0);
-               paragraph.FontSize = Source.FontSize;
-               paragraph.FontFamily = new FontFamily (Source.FontFamily);
-               paragraph.Tag = lineNo;
+               Paragraph paragraph = new Paragraph() {
+                  Margin = new Thickness(0),
+                  FontSize = Source.FontSize,
+                  FontFamily = new FontFamily(Source.FontFamily),
+                  Tag = lineNo
+               };
 
                if(null == lineNo2RangesParaMap)
                   lineNo2RangesParaMap = this.treeViewHandler.GetLineNo2RangesParaMap (sourceItem, true);
@@ -380,5 +364,4 @@ class RangesParagraph {
    internal Paragraph paragraph;
 }
 
-class LineNo2RangesParaMap : Dictionary<int, RangesParagraph> { }
 #endregion Private classes --------------------------------------------------------------

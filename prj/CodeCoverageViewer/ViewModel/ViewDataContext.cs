@@ -42,31 +42,15 @@ class ViewDataContext : ModelNotifyPropertyChanged {
    // Methods -----------------------------------------------------------------
    /// <summary> Initializes UI object such as Tree, SourceView...</summary>
    public void Init () {
-      TreeViewItem treeViewItem = this.treeViewHandler.InitCoverageTree (this.coverageTree, this.sourceViewerHandler);
+      TreeViewItem treeViewItem = this.treeViewHandler.InitCoverageTree (this.mainWindow.CoverageItems, this.sourceViewerHandler);
       treeViewItem.Selected += (s, e) => this.sourceViewerHandler.FileOpen ();      
 
-      MainWindow mainWindow = this.ui as MainWindow;
-      this.sourceViewerHandler.Init (mainWindow.SourceViewer, this.sourceBlocksStatusLb,
-                                     this.treeViewHandler, mainWindow);
+      this.sourceViewerHandler.Init (mainWindow.SourceViewer, this.mainWindow.SourceBlocksStatusLb,
+                                     this.treeViewHandler, this.mainWindow);
    }
-
-   #region Private Properties -------------------------------------------------
-   TreeView coverageTree {
-      get {
-         MainWindow mainWindow = this.ui as MainWindow;
-         return mainWindow.CoverageItems;
-      }
-   }
-   Label sourceBlocksStatusLb {
-      get {
-         MainWindow mainWindow = this.ui as MainWindow;
-         return mainWindow.SourceBlocksStatusLb;
-      }
-   }
-   #endregion
 
    // Private Data ------------------------------------------------------------
-   public Window ui = null;
+   public MainWindow mainWindow = null;
    public Utility.TreeViewHandler treeViewHandler { get; } = new ();
    private Utility.SourceViewerHandler sourceViewerHandler { get; } = new ();   
 }
