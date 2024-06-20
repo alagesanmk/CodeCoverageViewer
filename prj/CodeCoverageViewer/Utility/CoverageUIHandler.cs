@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows;
+using Microsoft.Win32;
 
 namespace CodeCoverageViewer.Utility;
 
@@ -151,6 +152,51 @@ class SourceViewerHandler {
       sourceViewer.Document = flowDocument;
       sourceViewer.Tag = null;
    }
+
+   /// <summary>
+   /// File Open function is to select a Code Coverage report file and 
+   /// loads report informations
+   /// </summary>
+   public void FileOpen () {
+      OpenFileDialog dialog = new OpenFileDialog ();
+      dialog.Filter = "Code Coverage Reports|*.xml";
+
+      if (false == dialog.ShowDialog ())
+         return;
+
+      this.OpenCoverageFile (dialog.FileName);
+   }
+
+   /// <summary> Opens a Coverage Xml file</summary>
+   /// <param name="coverageFilename "> Specifies the Xml coverage filename</param>
+   public void OpenCoverageFile (string coverageFilename) {
+      this.coverageFilename = coverageFilename;
+      // Loads Code Coveage informations
+      Reader reader = new ();
+      Item.RootItem rootItem = reader.Read (this.coverageFilename);
+      if (null == rootItem) {
+         MessageBox.Show (reader.Error, "Code Coverage Report File Read Error",
+                          MessageBoxButton.OK, MessageBoxImage.Error);
+         return;
+      }
+
+      // Set coverage items to TreeView, SourceViewer
+      this.treeViewHandler.SetCoverage (rootItem);
+      this.SetCoverage (rootItem);
+   }
+
+   public void Recompute() {
+      // Handles FileOpenCommand ----------------------------------------------
+      if (null == this.coverageFilename)
+         return;
+
+      this.OpenCoverageFile (this.coverageFilename);
+   }
+
+   public bool CanRecompute () {
+      return null != this.coverageFilename;
+   }
+   
 
    /// <summary> Loads a file (specified by filenName) into Source View and scroll to Line if lineNumber is given(not null)</summary>
    /// <param name="sourceItem"> Specifies the sourceItem whose file name to load</param>
@@ -315,6 +361,8 @@ class SourceViewerHandler {
    FlowDocumentScrollViewer sourceViewer = null;
    Label sourceCoverageStatusLb = null;
    Window window = null;
+
+   string coverageFilename = null;
 
    // Nested class ------------------------------------------------------------
    // class to Definitions Soruce Styles
