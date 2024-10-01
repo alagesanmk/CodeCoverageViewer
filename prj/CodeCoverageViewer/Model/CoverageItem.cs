@@ -12,22 +12,23 @@ internal class BaseItem : TreeViewItem {}
 
 // ModuleItem class ---------------------------------------------------------------------
 class ModuleItem  {
-   public string BlockCoverage;   
+   public string BlockCoverage = string.Empty;
 }
 
 // SourceItem class ---------------------------------------------------------------------
 class SourceItem : BaseItem {
-   public ModuleItem ModuleItem = null;
+   public ModuleItem ModuleItem = null!;
 
-   public string FileName;
-   public string NameSpace;
+   public string FileName = string.Empty;
+   public string NameSpace = string.Empty;
    public List<RangeItem> RangeItems = new ();
 
-   public string BlockCoverage;
+   public string BlockCoverage = string.Empty;
 }
 
 // RangeItem class ----------------------------------------------------------------------
 class RangeItem {
+   public SourceItem SourceItem;
    public int StartLine;
    public int StartColumn;
    public int EndLine;

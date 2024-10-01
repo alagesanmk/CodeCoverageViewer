@@ -19,7 +19,7 @@ class ViewDataContext : ModelNotifyPropertyChanged {
          return this.fileOpenCommand;
       }
    }
-   private ICommand fileOpenCommand;
+   private ICommand fileOpenCommand = null!;
 
    // RecomputeCommand ---------------------------------------------------------
    /// <summary> File Open menu handler</summary>
@@ -33,21 +33,21 @@ class ViewDataContext : ModelNotifyPropertyChanged {
          return this.recomputeCommmand;
       }
    }
-   private ICommand recomputeCommmand;   
+   private ICommand recomputeCommmand = null!;
    #endregion
 
    // Methods -----------------------------------------------------------------
    /// <summary> Initializes UI object such as Tree, SourceView...</summary>
    public void Init () {
       TreeViewItem treeViewItem = this.treeViewHandler.InitCoverageTree (this.mainWindow.CoverageTreeView, this.sourceViewerHandler);
-      treeViewItem.Selected += (s, e) => this.sourceViewerHandler.FileOpen ();      
+      treeViewItem.Selected += (s, e) => this.sourceViewerHandler.FileOpen ();
 
       this.sourceViewerHandler.Init (mainWindow.SourceViewer, this.mainWindow.SourceBlocksStatusLb,
                                      this.treeViewHandler, this.mainWindow);
    }
 
    // Private Data ------------------------------------------------------------
-   public MainWindow mainWindow = null;
+   public MainWindow mainWindow = null!;
    public Utility.TreeViewHandler treeViewHandler { get; } = new ();
    private Utility.SourceViewerHandler sourceViewerHandler { get; } = new ();   
 }

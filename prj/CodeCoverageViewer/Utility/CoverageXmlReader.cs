@@ -25,8 +25,9 @@ internal class Reader {
       ModuleMap moduleMap = new ();
       KeyItemMap driveMap = new ();
       KeyItemMap folderMap = new ();
-      XmlDocument xmlDoc = new XmlDocument ();
+      
       try {
+         XmlDocument xmlDoc = new();
          xmlDoc.Load (fileName);
 
          double blockCoverage;
@@ -87,6 +88,7 @@ internal class Reader {
 
          SourceItem sourceItem = sourceIdMap[rangeId] as SourceItem;
          RangeItem rangeItem = new () {
+            SourceItem = sourceItem,
             StartLine = int.Parse (attributes["start_line"]?.Value),
             StartColumn = int.Parse (attributes["start_column"]?.Value),
             EndLine = int.Parse (attributes["end_line"]?.Value),

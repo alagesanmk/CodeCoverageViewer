@@ -14,26 +14,26 @@ using LineNo2RangesParaMap = Dictionary<int, RangesParagraph>;
 class TreeViewHandler {
    #region Methods ------------------------------------------------------------
    /// <summary> Initialize Tree Item to handle Selected event and call Coverage file open method</summary>
-   /// <param name="coverageTree"> Specifies TreeVuew ui object to load Source Item</param>
+   /// <param name="treeView"> Specifies TreeView ui object to load Source Item</param>
    /// <param name="sourceViewerHandler"> Specifies depended SourceViewerHandler</param>
    /// <returns>Returns create Tree Item</returns>
-   public TreeViewItem InitCoverageTree (TreeView coverageTree, SourceViewerHandler sourceViewerHandler) {
-      this.coverageTree = coverageTree;
+   public TreeViewItem InitCoverageTree (TreeView treeView, SourceViewerHandler sourceViewerHandler) {
+      this.treeView = treeView;
       this.sourceViewerHandler = sourceViewerHandler;
 
       TreeViewItem treeViewItem = new TreeViewItem ();
       treeViewItem.Header = "[Click to load Report ...]";  // Short cut to open report file 
-      this.coverageTree.Items.Add (treeViewItem);
+      this.treeView.Items.Add (treeViewItem);
       return treeViewItem;      
    }
 
    /// <summary Set Coverage Items to Tree View and initialzes the Source viewer</summary>
    /// <param name="rootItem"> Coverage items to set Treeview</param>
    public void SetCoverage(Item.RootItem rootItem) {
-      this.coverageTree.Items.Clear();
+      this.treeView.Items.Clear();
 
       foreach (var item in rootItem.DriveItems) {
-         this.coverageTree.Items.Add(item);
+         this.treeView.Items.Add(item);
          item.ExpandSubtree();
 
          this.connectSourceItemEvent (item);
@@ -83,10 +83,10 @@ class TreeViewHandler {
    /// <summary> Connects Source Item Selected Event and add RangeItems to Source Item map</summary>
    /// <param name="parentItem">The parent BaseItem from SourceItem is accessed </param>
    void connectSourceItemEvent (Item.BaseItem parentItem) {
-      LineNo2RangesParaMap lineNo2RangesParaMap = null;
+      Item.SourceItem sourceItem;
+      LineNo2RangesParaMap lineNo2RangesParaMap;
       foreach (Item.BaseItem item in parentItem.Items) {
-         Item.SourceItem sourceItem = item as Item.SourceItem;
-         if (sourceItem != null) {
+         if ((sourceItem = item as Item.SourceItem) != null) {
             // Set SourceItem Selected Event Handler ----------------
             sourceItem.Selected += (sender, e) => {               
                Item.SourceItem sourceItem = sender as Item.SourceItem;
@@ -110,7 +110,7 @@ class TreeViewHandler {
    #endregion Implementation 
 
    // Private Data ------------------------------------------------------------
-   TreeView coverageTree = null;
+   TreeView treeView = null;
    SourceViewerHandler sourceViewerHandler = null;
    Dictionary<Item.SourceItem, LineNo2RangesParaMap> source2RangesParaMap = new ();
 }
@@ -265,9 +265,14 @@ class SourceViewerHandler {
          length = endColumn - startColumn + 1;
          rangeText = line.Substring (startColumn, length);
 
-         inLines.Add (new Run(rangeText) {
+         var run = new Run(rangeText) {
             Background = rangeItem.covered ? Source.CoveredBackgroundColor
-                                           : Source.NotCoveredBackgroundColor });
+                                           : Source.NotCoveredBackgroundColor
+         };
+
+         run.PreviewMouseUp += Run_PreviewMouseLeftButtonUp;
+         run.Tag = rangeItem;
+         inLines.Add (run);         
          #endregion Range Part 
 
          lineStartColumn = endColumn + 1; // Range endColumn is lineStartColumn for next Range
@@ -278,6 +283,13 @@ class SourceViewerHandler {
          rangeText = line.Substring (lineStartColumn, lineLength - lineStartColumn);
          inLines.Add (rangeText);
       }
+   }
+
+   private void Run_PreviewMouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+      Run run = (Run)sender;
+      Item.RangeItem rangeItem = (Item.RangeItem)run.Tag;
+      rangeItem.SourceItem.IsSelected = true;
+      e.Handled = true;
    }
 
    /// <summary> Reads source file and creates as paragraphs </summary>
